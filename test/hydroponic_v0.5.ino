@@ -17,7 +17,7 @@
 // Analog pins
 #define PH_SENSOR_PIN     A0    // pH sensor analog input
 #define TDS_SENSOR_PIN    A1    // TDS sensor analog input (TDS Meter V1.0)
-#define TEMP_SENSOR_PIN   2     // DS18B20 digital pin
+#define TEMP_SENSOR_PIN   2     // Hydroponic/src/Radish_Hydroponic_v1.inoHydroponic/src/Radish_Hydroponic_v1.ino
 
 // Digital pins (Relays)
 #define WATER_PUMP_PIN    7     // Main water circulation pump (15W)

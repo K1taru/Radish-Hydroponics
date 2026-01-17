@@ -1,7 +1,7 @@
-# Radish Hydroponic System v1.0 - Documentation
+# Radish Hydroponic System v2.0 - Documentation
 
 ## Overview
-Automated tower hydroponic system for radish cultivation with pH/TDS/temperature monitoring and sequential nutrient dosing to prevent chemical precipitation.
+Automated tower hydroponic system for radish cultivation with pH/TDS/temperature monitoring, sequential nutrient dosing to prevent chemical precipitation, and automatic water level detection with refill capability.
 
 ---
 
@@ -19,6 +19,7 @@ Automated tower hydroponic system for radish cultivation with pH/TDS/temperature
 - **Water Circulation Pump** (15W) → Pin 7
 - **Peristaltic Pump A** (Nutrient Solution A) → Pin 8
 - **Peristaltic Pump B** (Nutrient Solution B) → Pin 9
+- **Water Refill Pump** → Pin 10
 
 ### Display
 - **20x4 I2C LCD** (Address: 0x27)
@@ -60,6 +61,15 @@ DallasTemperature.h    // DS18B20 interface
 | Warning | 24-26°C | WARM |
 | Critical | >26°C | HOT! |
 
+### Low Water Detection (v2.0)
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| Threshold | 100 ppm | TDS ≤ 100 indicates sensor not submerged |
+| Refill Duration | 30 seconds | Water pump run time per refill cycle |
+| Detection Method | TDS sensor | Low TDS reading = low water level |
+
+**Note:** When water level drops below TDS sensor probe, readings fall to 0-100 ppm (vs normal 600-900 ppm), triggering auto-refill.
+
 ---
 
 ## Timing Configuration
@@ -79,6 +89,12 @@ DallasTemperature.h    // DS18B20 interface
 | Mix B Time | 5 minutes | Final mixing |
 | Wait Period | 3 minutes | Sensor stabilization |
 
+### Water Refill (v2.0)
+| Operation | Duration | Description |
+|-----------|----------|-------------|
+| Refill Time | 30 seconds | Water refill pump run time |
+| Detection Check | Continuous | Monitors TDS on every sensor read |
+
 ### Update Intervals
 | Task | Interval | Purpose |
 |------|----------|---------|
@@ -86,6 +102,60 @@ DallasTemperature.h    // DS18B20 interface
 | LCD Update | 2 seconds | Display refresh |
 | Nutrient Check | 60 seconds | TDS evaluation |
 | Serial Output | 10 seconds | Debug logging |
+
+---
+
+## Water Level Detection & Auto-Refill (v2.0)
+
+### Detection Principle
+The system uses the TDS sensor as a dual-purpose device:
+- **Normal Operation**: Reads nutrient concentration (600-900 ppm)
+- **Low Water Detection**: When water level drops below sensor probe, TDS reads ≤100 ppm
+
+### Why This Works
+- TDS measures electrical conductivity of solution
+- When sensor is not submerged, conductivity drops to near zero
+- Threshold of 100 ppm provides reliable detection with safety margin
+- Avoids need for dedicated water level sensor
+
+### Refill State Machine
+```
+MONITORING (Normal)
+    ↓ TDS ≤ 100 ppm
+REFILLING (Pump ON 30 sec)
+    ↓ Complete
+MONITORING (Resume)
+```
+
+### Algorithm Flow
+```cpp
+if (refillActive) {
+    if (elapsed >= 30 seconds) {
+        Turn OFF refill pump
+        refillActive = false
+        status = "Running"
+    }
+    return  // Skip other checks
+}
+
+if (tds <= 100) {
+    Turn ON refill pump
+    refillActive = true
+    status = "Refilling"
+    Record start time
+}
+```
+
+### Safety Features
+- **Fixed Duration**: 30-second timeout prevents overflow
+- **Blocks Nutrient Dosing**: No nutrients added during refill
+- **Status Display**: LCD shows "Refilling" during operation
+- **Logging**: Serial monitor records refill events
+
+### Hardware Setup
+- Refill pump draws from external clean water source (tap/barrel)
+- Position TDS probe at desired minimum water level in reservoir
+- Ensure probe is vertically mounted for consistent detection
 
 ---
 
@@ -219,6 +289,14 @@ Temp:27.1C HOT!
 Pump:ON  Mixing B  
 ```
 
+### Water Refill Mode (v2.0)
+```
+pH:7.02 OK          
+TDS:85ppm LOW       
+Temp:21.5C OK       
+Pump:OFF Refilling 
+```
+
 ---
 
 ## Operating Modes
@@ -236,6 +314,13 @@ Pump:ON  Mixing B
 - Sequential A→Mix→B→Mix cycle
 - Normal operation resumes after completion
 - 3-minute wait before next TDS check
+
+### Water Refill Mode (v2.0)
+- Triggered when TDS ≤ 100 ppm
+- Refill pump activated for 30 seconds
+- All nutrient dosing blocked during refill
+- Resumes monitoring after completion
+- Automatic detection on every sensor read cycle
 
 ---
 
@@ -265,6 +350,12 @@ Pump:ON  Mixing B
 - Normal pump schedule suspended during dosing
 - Ensures continuous mixing during critical period
 - Automatically resumes normal operation
+
+### Water Refill Protection (v2.0)
+- Fixed 30-second duration prevents reservoir overflow
+- Nutrient dosing suspended during refill
+- Prevents dosing into low-water conditions
+- Automatic resumption after refill complete
 
 ---
 
@@ -365,6 +456,18 @@ Pump:OFF
 - Verify 4.7kΩ pull-up resistor
 - Replace sensor if defective
 
+### Water Refill Not Triggering (v2.0)
+- Check TDS sensor reads ≤100 ppm when water low
+- Verify refill pump connection (Pin 10)
+- Ensure TDS probe positioned at desired minimum level
+- Test pump manually with digitalWrite() test sketch
+
+### Water Refill Constant Triggering
+- TDS sensor reading too low (calibration issue)
+- Check sensor is properly submerged during normal operation
+- Verify normal TDS reads 600-900 ppm when water adequate
+- Inspect for sensor damage or contamination
+
 ---
 
 ## Technical Specifications
@@ -389,7 +492,10 @@ Pump:OFF
 
 ## Version History
 
-### v1.0 (Current)
+### v2.0 (Current)
+- **NEW:** Automatic water level detection via TDS sensor
+- **NEW:** Auto-refill pump control (30-second cycles)
+- **NEW:** Low water detection at TDS ≤ 100 ppm threshold
 - Sequential nutrient dosing with mixing prevention
 - pH monitoring only (manual adjustment)
 - Temperature-compensated TDS
@@ -397,17 +503,26 @@ Pump:OFF
 - Non-blocking operation
 - Memory optimized (char arrays vs String)
 
+### v1.0
+- Initial release
+- Basic pH/TDS/temperature monitoring
+- Sequential nutrient dosing algorithm
+- Manual water level management
+
 ---
 
 ## Future Enhancements
 
+### Completed
+- ✅ Water level detection with auto-refill (v2.0)
+
 ### Potential Additions
-- Water level sensor with auto-refill
 - pH automation with dosing pumps
 - Data logging to SD card
 - WiFi/Bluetooth monitoring
 - Multi-zone support
 - Growth stage profiles
+- Flow sensor for pump verification
 
 ---
 
@@ -437,6 +552,6 @@ For issues or questions:
 
 ---
 
-**Last Updated:** January 15, 2026  
-**Code Version:** 1.0  
+**Last Updated:** January 17, 2026  
+**Code Version:** 2.0  
 **Author:** K1taru

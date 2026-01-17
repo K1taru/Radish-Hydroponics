@@ -4,7 +4,7 @@
 | pH Test Strips (used manually for test)| 100 pcs  |
 | Nutrient Solution (RAMGO HydroGro)     | 1 pc     |
 | Net Pots                               | 12 pcs   |
-| Water Pump with Water Inlet (15W)      | 1 pc     |
+| Water Pump with Water Inlet (15W)      | 2 pcs    |
 | Water hose                             | 1 pc     |
 | PVC Pipe                               | 3 pcs    |
 | Plastic container                      | 1 pc     |
@@ -13,7 +13,7 @@
 | Electrical Box                         | 1 pc     |
 | Arduino Uno                            | 1 pc     |
 | Loam soil                              | 1 pc     |
-| Relay Module                           | 1 pc     |
+| 4 Relay Module                         | 1 pc     |
 | pH sensor                              | 1 pc     |
 | TDS Sensor Board                       | 1 pc     |
 | Temperature Sensor                     | 1 pc     |
@@ -33,13 +33,14 @@
 |----------------------|----------|
 | Arduino Uno          | 1 pc     |
 | ESP32 Board          | 1 pc     |
-| Relay Module         | 1 pc     |
+| Relay Module (4ch)   | 1 pc     |
 | pH sensor            | 1 pc     |
 | TDS Sensor Board     | 1 pc     |
 | Temperature Sensor   | 1 pc     |
 | LED Display          | 1 pc     |
 | LCD Display 4 lines  | 1 pc     |
 | Peristaltic Pump     | 2 pcs    |
+| Water Refill Pump    | 1 pc     |
 | Power Adapter        | 1 pc     |
 | Breadboard           | 1 pc     |
 | Jumper Wires         | pcs      |
@@ -80,6 +81,7 @@ This is an **automated tower hydroponic system** designed specifically for growi
     └─────────┘                 │ - Nut B│
                                 │ - pH ↑ │
                                 │ - pH ↓ │
+                                │ -Refill│
                                 └────────┘
 ```
 
@@ -275,6 +277,75 @@ ENDIF
 **Configurable Parameters**:
 - `WATER_PUMP_ON_DURATION`: Adjust based on tower height and pump flow rate
 - `WATER_PUMP_OFF_DURATION`: Adjust based on plant type and environmental conditions
+
+---
+
+### 4.1 Water Level Detection & Auto-Refill (`checkWaterLevel()`)
+
+**Purpose**: Automatically detect low water level in reservoir and refill from external water source
+
+**Detection Method**: Uses TDS sensor as a water level indicator
+- When water level drops below the TDS sensor probe, the sensor reads very low values (0-100 ppm)
+- Normal nutrient solution reads 600-900+ ppm
+- A reading of ≤100 ppm reliably indicates the sensor is no longer submerged
+
+**Configurable Thresholds**:
+- `LOW_WATER_TDS_THRESHOLD`: 100 ppm (trigger point for low water detection)
+- `WATER_REFILL_DURATION`: 30,000 ms (30 seconds pump run time)
+
+**State Machine**:
+
+```
+┌─────────────────────────────────────────────┐
+│  State: MONITORING                          │
+│                                             │
+│  Condition: TDS <= LOW_WATER_TDS_THRESHOLD? │
+│      YES → Activate refill pump, transition │
+│      NO  → Continue monitoring              │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│  State: REFILLING                           │
+│                                             │
+│  Wait: WATER_REFILL_DURATION (30 sec)       │
+│                                             │
+│  Condition: Time elapsed?                   │
+│      YES → Turn pump OFF, transition back   │
+│      NO  → Continue refilling               │
+└─────────────────────────────────────────────┘
+```
+
+**Detailed Logic**:
+```
+IF refillActive == TRUE:
+    IF (currentTime - refillStartTime) >= WATER_REFILL_DURATION:
+        digitalWrite(WATER_REFILL_PUMP, LOW)  // Turn OFF
+        refillActive = FALSE
+        status = "Running"
+        Log: "Water refill complete"
+    ENDIF
+    RETURN  // Skip further checks during refill
+ENDIF
+
+IF TDS <= LOW_WATER_TDS_THRESHOLD:  // ≤ 100 ppm
+    Log: "Low water detected!"
+    status = "Refilling"
+    digitalWrite(WATER_REFILL_PUMP, HIGH)  // Turn ON
+    refillActive = TRUE
+    refillStartTime = currentTime
+ENDIF
+```
+
+**Safety Features**:
+1. **Nutrient dosing blocked**: System will not dose nutrients while refilling
+2. **Fixed duration**: Pump runs for exactly 30 seconds to prevent overflow
+3. **Status display**: LCD shows "Refilling" during operation
+4. **Serial logging**: Events logged for monitoring
+
+**Hardware Connection**:
+- Water refill pump connected to relay on pin 10
+- Pump draws water from external clean water source (tap, barrel, etc.)
+- Position reservoir TDS probe at desired minimum water level
 
 ---
 
@@ -654,7 +725,7 @@ loop():
 3. **Adaptive Control**: Machine learning for optimal setpoints
 4. **Multi-Zone**: Control multiple towers independently
 5. **Flow Sensor**: Verify pump operation and detect clogs
-6. **Water Level Sensor**: Auto-fill reservoir when low
+6. ~~**Water Level Sensor**: Auto-fill reservoir when low~~ ✅ **IMPLEMENTED** (v2.0 - uses TDS sensor for detection)
 7. **Light Control**: Integrate grow lights with day/night cycles
 8. **CO₂ Enrichment**: Monitor and control CO₂ for faster growth
 9. **Camera Integration**: Automated plant health monitoring
