@@ -229,7 +229,7 @@ TDS = (133.42×V³ - 255.86×V² + 857.39×V) × 0.5
 ┌─────────────────────────────────────────────┐
 │  State: PUMP OFF                            │
 │                                             │
-│  Wait: WATER_PUMP_OFF_DURATION (15 min)    │
+│  Wait: WATER_PUMP_OFF_DURATION (15 min)     │
 │                                             │
 │  Condition: Time elapsed?                   │
 │      YES → Turn pump ON, transition         │
@@ -239,7 +239,7 @@ TDS = (133.42×V³ - 255.86×V² + 857.39×V) × 0.5
 ┌─────────────────────────────────────────────┐
 │  State: PUMP ON                             │
 │                                             │
-│  Wait: WATER_PUMP_ON_DURATION (5 min)      │
+│  Wait: WATER_PUMP_ON_DURATION (5 min)       │
 │                                             │
 │  Condition: Time elapsed?                   │
 │      YES → Turn pump OFF, transition        │
