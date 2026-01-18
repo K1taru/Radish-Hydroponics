@@ -1,46 +1,140 @@
 # Hydroponic System - Visual Wiring Diagram
 
+## ⚠️ SAFETY WARNING - AC 220V HIGH VOLTAGE ⚠️
+
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║    DANGER: This system uses AC 220V for the water pump!                      ║
+║                                                                              ║
+║  • ALWAYS disconnect from outlet before working on wiring                    ║
+║  • Use proper insulation and electrical tape on all AC connections           ║
+║  • Keep AC wiring away from water and moisture                               ║
+║  • Consider using a GFCI/RCD outlet for safety                               ║
+║  • If unsure, consult a licensed electrician                                 ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## Your Actual Power Configuration
+
+| Relay | Pump | Power Source | Voltage |
+|-------|------|--------------|---------|  
+| R1 (D7) | Water Pump (15W) | AC Wall Outlet | **220V AC** ⚡ |
+| R2 (D8) | Nutrient A (Peristaltic) | 12V DC Adapter | 12V DC |
+| R3 (D9) | Nutrient B (Peristaltic) | 12V DC Adapter | 12V DC |
+| R4 (D10)| Refill (Peristaltic)     | 12V DC Adapter | 12V DC |
+
+---
+
 ## Complete System Overview (v2.0)
 
 ```
-                                    ┌─────────────────────────────────────────────────────────────┐
-                                    │                      12V POWER SUPPLY                       │
-                                    │                         (2A min)                            │
-                                    └──────────────┬─────────────────────────┬────────────────────┘
-                                                   │ (+12V)                  │ (GND)
-                                                   │                         │
-                    ┌──────────────────────────────┼─────────────────────────┼──────────────────────────────┐
-                    │                              ▼                         ▼                              │
-                    │  ┌─────────────────────────────────────────────────────────────────────────────────┐  │
-                    │  │                           4-CHANNEL RELAY MODULE                                │  │
-                    │  │  ┌─────────┬─────────┬─────────┬─────────┐                                      │  │
-                    │  │  │   R1    │   R2    │   R3    │   R4    │  ◄── Relay Channels                  │  │
-                    │  │  │  (D7)   │  (D8)   │  (D9)   │  (D10)  │                                      │  │
-                    │  │  ├─────────┼─────────┼─────────┼─────────┤                                      │  │
-                    │  │  │COM NO NC│COM NO NC│COM NO NC│COM NO NC│                                      │  │
-                    │  │  └─┬──┬────┴─┬──┬────┴─┬──┬────┴─┬──┬────┘                                      │  │
-                    │  │    │  │      │  │      │  │      │  │                                           │  │
-                    │  │    │  │      │  │      │  │      │  │      ┌─────┬─────┬─────┬─────┬───────┐    │  │
-                    │  │    │  │      │  │      │  │      │  │      │ IN1 │ IN2 │ IN3 │ IN4 │VCC│GND│    │  │
-                    │  │    │  │      │  │      │  │      │  │      └──┬──┴──┬──┴──┬──┴──┬──┴─┬─┴─┬─┘    │  │
-                    │  └────┼──┼──────┼──┼──────┼──┼──────┼──┼─────────┼─────┼─────┼─────┼────┼───┼──────┘  │
-                    │       │  │      │  │      │  │      │  │         │     │     │     │    │   │         │
-                    │       │  │      │  │      │  │      │  │         │     │     │     │    │   │         │
-                    └───────┼──┼──────┼──┼──────┼──┼──────┼──┼─────────┼─────┼─────┼─────┼────┼───┼─────────┘
-                            │  │      │  │      │  │      │  │         │     │     │     │    │   │
-     12V+ ──────────────────┘  │      │  │      │  │      │  │         │     │     │     │    │   │
-     (to all COM)──────────────┼──────┘  │      │  │      │  │         │     │     │     │    │   │
-                               │         │      │  │      │  │         │     │     │     │    │   │
-                               │         │      │  │      │  │         │     │     │     │    │   │
-                               ▼         ▼      │  ▼      │  ▼         │     │     │     │    │   │
-                           ┌───────┐ ┌───────┐  │┌───────┐│┌───────┐   │     │     │     │    │   │
-                           │ WATER │ │ NUT A │  ││ NUT B │││REFILL │   │     │     │     │    │   │
-                           │ PUMP  │ │ PUMP  │  ││ PUMP  │││ PUMP  │   │     │     │     │    │   │
-                           │ (15W) │ │(Peri) │  ││(Peri) │││(Peri) │   │     │     │     │    │   │
-                           └───┬───┘ └───┬───┘  │└───┬───┘│└───┬───┘   │     │     │     │    │   │
-                               │         │      │    │    │    │       │     │     │     │    │   │
-                               └─────────┴──────┴────┴────┴────┴───────┼─────┼─────┼─────┼────┼───┤
-                                         All Pump (-) to 12V GND ──────┼─────┼─────┼─────┼────┼───┤
+                                                        ┌─────────────────────────┐
+        ┌──────────────┐                                │    12V DC ADAPTER       │
+        │  AC 220V     │                                │    ┌───────────────┐    │
+        │  OUTLET      │                                │    │   ████████    │    │
+        │  (Wall)      │                                │    │   12V  1A     │    │
+        │  ┌───────┐   │                                │    │   DC OUTPUT   │    │
+        │  │ L │ N │   │                                │    └───────┬───────┘    │
+        │  │ ● │ ● │   │                                │            │            │
+        │  └─┬───┬─┘   │                                │     ┌──────┴──────┐     │
+        └────┼───┼─────┘                                │     │ (+)     (-) │     │
+             │   │                                      │     │ RED   BLACK │     │
+        LIVE │   │ NEUTRAL                              │     └──┬───────┬──┘     │
+             │   │                                      └────────┼───────┼────────┘
+             │   │                                               │       └────┐
+             │   ▼                                               │            ▼
+             │ (from pump)                                       │          12V(-) (from all pump)
+             ▼                                                   └─────────────────────┐
+    ┌──────────────────────────────────────────────────────────────────────────────┐   |
+    │                             4-CHANNEL RELAY MODULE                           │   |
+    │                                                                              │   |
+    │  ┌──────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐            │   |
+    │  │ RELAY 1      │  │  RELAY 2   │  │  RELAY 3   │  │  RELAY 4   │            │   |
+    │  │ AC 220V      │  │  DC 12V    │  │  DC 12V    │  │  DC 12V    │            │   |
+    │  │              │  │            │  │            │  │            │            │   |
+    │  │ NC COM  NO   │  │NC COM  NO  │  │NC COM  NO  │  │NC COM  NO  │            │   |
+    │  │  X  │   │    │  │ X  │   │   │  │ X  ║   │   │  │ X  ║   │   │            │   |
+    │  └─────┼───┼────┘  └────┼───┼───┘  └────║───┼───┘  └────║───┼───┘            │   |
+    │        │   │            │   ▼           ║   ▼           ║   ▼           ┌────┤   |
+    │   AC   │   │            │  NO2          ║  NO3          ║  NO4     12V(-) ───┤   |
+    │  LIVE ─┘   │            └───────────────┴───────────────┴───┐      to all    │   |
+    │  goes      ▼                    │                           │      pump (-)  │   |
+    │  here     NO1              U-CONNECTION                     │           └────┤   |
+    │        (to pump)      12V(+)──►COM2◄═══►COM3◄═══►COM4       │                │   |
+    │                                   (jumper)  (jumper)        │                │   |
+    │                                                             └────────────────┼───┘ 12V(+)
+    │                                                                              │
+    │                                                                              │
+    │  ┌─────────────────────────────────────────────────────────────────────────┐ │
+    │  │   IN1   IN2   IN3   IN4   VCC   GND                                     │ │
+    │  │    │     │     │     │     │     │                                      │ │
+    │  └────┼─────┼─────┼─────┼─────┼─────┼──────────────────────────────────────┘ │
+    │       │     │     │     │     │     │                                        │
+    └───────┼─────┼─────┼─────┼─────┼─────┼────────────────────────────────────────┘
+            │     │     │     │     │     │
+            │     │     │     │     │     │            TO ARDUINO:
+            │     │     │     │     │     └──────────► GND
+            │     │     │     │     └────────────────► 5V
+            │     │     │     └──────────────────────► D10
+            │     │     └────────────────────────────► D9
+            │     └──────────────────────────────────► D8
+            └────────────────────────────────────────► D7
+
+
+    ═══════════════════════════════════════════════════════════════════════════════
+                                 PUMP CONNECTIONS
+    ═══════════════════════════════════════════════════════════════════════════════
+
+         From Relay NO1                  From Relay NO2, NO3, NO4
+              │                                   │     │     │
+              │                                   │     │     │
+              ▼                                   ▼     ▼     ▼
+    ┌─────────────────┐            ┌────────────────────────────────────────────┐
+    │   WATER PUMP    │            │            3x PERISTALTIC PUMPS            │
+    │    AC 220V      │            │                                            │
+    │     (15W)       │            │  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+    │                 │            │  │NUTRIENT A│  │NUTRIENT B│  │  REFILL  │  │
+    │   ┌─────────┐   │            │  │  PUMP    │  │  PUMP    │  │  PUMP    │  │
+    │   │         │   │            │  │  12V DC  │  │  12V DC  │  │  12V DC  │  │
+    │   │   MOT   │   │            │  │          │  │          │  │          │  │
+    │   │         │   │            │  │  (+)(-)  │  │  (+)(-)  │  │  (+)(-)  │  │
+    │   └─────────┘   │            │  │   │  │   │  │   │  │   │  │   │  │   │  │
+    │                 │            │  └───┼──┼───┘  └───┼──┼───┘  └───┼──┼───┘  │
+    │    ●       ●    │            │      │  │          │  │          │  │      │
+    │    │       │    │            │ from │  │     from │  │     from │  │      │
+    │  LIVE    NEUT   │            │ NO2 ─┘  │     NO3 ─┘  │     NO4 ─┘  │      │
+    │    │       │    │            │         │             │             │      │
+    │    │       │    │            │         └─────────────┴─────────────┘      │
+    └────┼───────┼────┘            │                       │                    │
+         │       │                 │          All pump (-) to 12V GND           │
+    from │       │                 └───────────────────────┼────────────────────┘
+    NO1 ─┘       │                                         │
+                 │                                         │
+    AC NEUTRAL ──┘                                         └──────► To 12V Adapter (-)
+    (direct from outlet, uncut)
+```
+
+**PUMP CONNECTIONS SUMMARY:**
+```
+    RELAY 1 (AC 220V):               RELAYS 2,3,4 (DC 12V):
+    ─────────────────                ──────────────────────
+    
+    From Outlet LIVE ─► COM1         12V(+) ─► COM2═COM3═COM4 (U-connection)
+    From NO1 ─► Water Pump           NO2 ─► Nut A Pump (+)
+    Outlet NEUTRAL ─► Pump           NO3 ─► Nut B Pump (+)
+    (direct, uncut)                  NO4 ─► Refill Pump (+)
+                                     
+                                     12V(-) spliced to all 3 pump (-)
+```
+
+---
+
+## Arduino UNO R3 Pinout Diagram
+
+```
+                                                                       ▼     ▼     ▼     ▼    ▼   ▼
                                                                        │     │     │     │    │   │
                                                                        │     │     │     │    │   │
   ┌────────────────────────────────────────────────────────────────────┼─────┼─────┼─────┼────┼───┼────┐
@@ -55,35 +149,35 @@
   │    ║              │                 │   │   │   │                  │     │     │     │    │   │ ║  │
   │    ║              │                 │   │   │   └──────────────────┼─────┼─────┼─────┘    │   │ ║  │
   │    ║              │                 │   │   └──────────────────────┼─────┼─────┘          │   │ ║  │
-  │    ║              │                 │   └──────────────────────────┼─────┘                │   │ ║  │
-  │    ║              │                 └──────────────────────────────┘                      │   │ ║  │
-  │    ║              │                                                                       │   │ ║  │
-  │    ║  ┌───────────┼───────────────────────────────────────────────────────────────────────┼───┼─╫─┐│
-  │    ║  │           │                    POWER PINS                                         │   │ ║ ││
-  │    ║  │  RESET   3.3V   5V   GND   GND   Vin                                              │   │ ║ ││
-  │    ║  │    ○      ○     ●     ●     ○     ○                                               │   │ ║ ││
-  │    ║  └────────────────┬─────┬──────────────────────────────────────────────────────────┬─┼───┼─╫─┘│
-  │    ║                   │     │                                                          │ │   │ ║  │
-  │    ║                   │     │                                                          │ │   │ ║  │
-  │    ║  ┌────────────────┼─────┼──────────────────────────────────────────────────────────┼─┼───┼─╫─┐│
-  │    ║  │                │     │          ANALOG PINS                                     │ │   │ ║ ││
-  │    ║  │   A0   A1   A2   A3   A4   A5                                                   │ │   │ ║ ││
-  │    ║  │    ●    ●    ○    ○    ●    ●                                                   │ │   │ ║ ││
-  │    ║  └────┼────┼─────────────┼────┼────────────────────────────────────────────────────┼─┼───┼─╫─┘│
-  │    ║       │    │             │    │                                                    │ │   │ ║  │
-  │    ╚═══════╪════╪═════════════╪════╪════════════════════════════════════════════════════╪═╪═══╪═╝  │
-  │            │    │             │    │                                                    │ │   │    │
-  └────────────┼────┼─────────────┼────┼────────────────────────────────────────────────────┼─┼───┼────┘
-               │    │             │    │                                                    │ │   │
-               │    │             │    │         ┌──────────────────────────────────────────┘ │   │
-               │    │             │    │         │   ┌────────────────────────────────────────┘   │
-               │    │             │    │         │   │   ┌────────────────────────────────────────┘
-               │    │             │    │         │   │   │
-               ▼    │             ▼    ▼         ▼   ▼   ▼
-    ┌──────────┐    │        ┌─────────────┐  ┌─────────────────────────────────────────┐
-    │pH SENSOR │    │        │ I2C LCD     │  │           RELAY MODULE                  │
-    │  MODULE  │    │        │  20x4       │  │  (Control Signal Connections)           │
-    ├──────────┤    │        ├─────────────┤  └─────────────────────────────────────────┘
+  │    ║              │                 │   └──────────────────────────┼─────┘                ▼   ▼ ║  │
+  │    ║              │                 └──────────────────────────────┘                     5V  GND║  │
+  │    ║              │                                                                  (POWER PIN)║  │
+  │    ║  ┌───────────┼─────────────────────────────────────────────────────────────────────────────╫─┐│
+  │    ║  │           │                    POWER PINS                                               ║ ││
+  │    ║  │  RESET   3.3V   5V   GND   GND   Vin                                                    ║ ││
+  │    ║  │    ○      ○     ●     ●     ○     ○                                                     ║ ││
+  │    ║  └─────────────────────────────────────────────────────────────────────────────────────────╫─┘│
+  │    ║                                                                                            ║  │
+  │    ║                                                                                            ║  │
+  │    ║  ┌─────────────────────────────────────────────────────────────────────────────────────────╫─┐│
+  │    ║  │                                 ANALOG PINS                                             ║ ││
+  │    ║  │   A0   A1   A2   A3   A4   A5                                                           ║ ││
+  │    ║  │    ●    ●    ○    ○    ●    ●                                                           ║ ││
+  │    ║  └────┼────┼─────────────┼────┼────────────────────────────────────────────────────────────╫─┘│
+  │    ║       │    │             │    │                                                            ║  │
+  │    ╚═══════╪════╪═════════════╪════╪════════════════════════════════════════════════════════════╝  │
+  │            │    │             │    │                                                               │
+  └────────────┼────┼─────────────┼────┼───────────────────────────────────────────────────────────────┘
+               │    │             │    │
+               │    │             │    │
+               │    │             │    │
+               │    │             │    │
+               │    │             │    │
+               ▼    │             ▼    ▼
+    ┌──────────┐    │        ┌─────────────┐
+    │pH SENSOR │    │        │ I2C LCD     │
+    │  MODULE  │    │        │  20x4       │
+    ├──────────┤    │        ├─────────────┤
     │ VCC → 5V │    │        │ VCC → 5V    │
     │ GND → GND│    │        │ GND → GND   │
     │ OUT → A0 │    │        │ SDA → A4    │
@@ -156,20 +250,39 @@ ARDUINO                  RELAY MODULE
 
 ---
 
-### ⚡ Circuit 2: SWITCHING SIDE (12V Pump Power)
+### ⚡ Circuit 2: SWITCHING SIDE (Pump Power)
+
+**RELAY 1 - AC 220V Water Pump:**
 ```
-12V SUPPLY              RELAY MODULE           PUMPS
+AC 220V OUTLET          RELAY 1              WATER PUMP (15W)
                        ┌────────────────┐
-  12V+  ──────────────►│ COM  NO  NC    │
-                       │  │   │   X     │
-                       │  └───┼───┘     │───► Pump (+)
+  LIVE  ──────────────►│ COM  NO  NC    │
+  (Brown)              │  │   │   X     │
+                       │  └───┼───┘     │───► Pump LIVE wire (cut)
                        │   (switch)     │
                        └────────────────┘
-                       (Repeat for R2, R3, R4)
-
-  Pump (-) ──────────────────────────────────► 12V GND
+  
+  NEUTRAL ─────────────────────────────────► Pump NEUTRAL wire (uncut)
+  (Blue)
 ```
-**This side is electrically isolated from Arduino** - it just switches 12V power to pumps
+
+**RELAYS 2,3,4 - DC 12V Peristaltic Pumps (U-Connection):**
+```
+12V ADAPTER             RELAY MODULE           PUMPS
+                       ┌────────────────────────────────────┐
+                       │  RELAY 2    RELAY 3    RELAY 4     │
+  12V(+) ─────────────►│  COM ══════ COM ══════ COM         │ (U-connection)
+                       │   │         │         │            │
+                       │   NO        NO        NO           │
+                       │   │         │         │            │
+                       └───┼─────────┼─────────┼────────────┘
+                           │         │         │
+                           ▼         ▼         ▼
+                        Nut A(+)  Nut B(+)  Refill(+)
+  
+  12V(-) ──────────────────────────────────► All 3 pump (-) wires (spliced)
+```
+**This side is electrically isolated from Arduino** - it just switches power to pumps
 
 ---
 
@@ -187,26 +300,326 @@ Wire from Arduino    →    Wire to Relay Module
   Pin D10            →    IN4 (orange wire)
 ```
 
-### Step 2: Connect Pump Power (12V Supply → Relay → Pumps)
+### Step 2: Connect Relay 1 - AC 220V Water Pump
 
-**For Each Relay Channel:**
+**⚠️ HIGH VOLTAGE - EXTREME CAUTION!**
 ```
-12V(+) → COM terminal
-         │
-         └── NO terminal → Pump (+) wire
-         
-         NC terminal → (leave empty)
-
-Pump (-) wire → 12V Ground
+1. UNPLUG the pump from wall outlet!
+2. Cut the pump's power cord (not too close to pump or plug)
+3. Strip the wires - identify LIVE (brown/black) and NEUTRAL (blue)
+4. NEUTRAL (Blue): Reconnect these two ends together (splice/connector)
+5. LIVE (Brown/Black): 
+   - Plug side wire → Relay COM1 terminal
+   - Pump side wire → Relay NO1 terminal
+6. Insulate all connections with electrical tape or heat shrink
 ```
 
-**Specific Connections:**
-- **Relay 1**: COM = 12V+, NO = Water Pump (+)
-- **Relay 2**: COM = 12V+, NO = Nutrient A Pump (+)
-- **Relay 3**: COM = 12V+, NO = Nutrient B Pump (+)  
-- **Relay 4**: COM = 12V+, NO = Refill Pump (+)
+**Simplified View:**
+```
+    OUTLET                RELAY 1              WATER PUMP
+    ══════                ═══════              ══════════
+    
+    LIVE ─────────────► COM ──┐
+     (Brown)                  │ (relay switch)
+                         NO ──┴─────────────► Pump Wire 1 (LIVE side)
+                         
+    NEUTRAL ────────────────────────────────► Pump Wire 2 (Blue - uncut)
+     (Blue)
+```
 
-**All pump (-) wires** → Connect to 12V Ground
+### Step 3: Connect Relays 2,3,4 - DC 12V Peristaltic Pumps (U-Connection)
+
+**Cut 12V adapter output wire and use U-connection to reduce wire clutter:**
+```
+12V Adapter (+) ───────────────────────────┐
+                                           │
+                                           ▼
+    ┌──────────┐      ┌──────────┐      ┌──────────┐
+    │   COM2   │══════│   COM3   │══════│   COM4   │
+    │          │ ~3cm │          │ ~3cm │          │
+    └────┬─────┘jumper└────┬─────┘jumper└────┬─────┘
+         │                 │                 │
+        NO2               NO3               NO4
+         │                 │                 │
+         ▼                 ▼                 ▼
+     Nut A (+)         Nut B (+)        Refill (+)
+```
+
+**Split the 12V Ground (Negative) Wire:**
+```
+    12V Adapter (-) BLACK
+          │
+          │ CUT ✂️
+          │
+    ┌─────┴─────┐
+    │  SPLICE   │  (Use wire nuts, Wago connectors, or terminal block)
+    └─┬───┬───┬─┘
+      │   │   │
+      │   │   └────────► Refill Pump (-)
+      │   └────────────► Nut B Pump  (-)
+      └────────────────► Nut A Pump  (-)
+```
+
+---
+
+## 🎨 PHYSICAL WIRING DRAWINGS
+
+### Drawing 1: Arduino to Relay Module (6 Control Wires)
+
+```
+    ┌─────────────────────────────────────┐
+    │           ARDUINO UNO R3            │
+    │  ┌───────────────────────────────┐  │
+    │  │ ○ ○ ○ ○ ○ ○ ○ ● ● ● ● ○ ○ ○   │  │  ← Digital Pins
+    │  │              D7 D8 D9 D10     │  │
+    │  └──────────────┼──┼──┼──┼───────┘  │
+    │                 │  │  │  │          │
+    │  ┌──────────────┼──┼──┼──┼───────┐  │
+    │  │   ○    ○    ●    ●    ○    ○  │  │  ← Power Pins
+    │  │ RESET 3.3V  5V  GND  GND  Vin │  │
+    │  └─────────────┼────┼────────────┘  │
+    │                │    │               │
+    └────────────────┼────┼───────────────┘
+                     │    │
+    WIRES:           │    │
+    ══════           │    │    ┌─ 🟠 Orange (D7 → IN1)
+                     │    │    │  🟠 Orange (D8 → IN2)
+      🔴 Red ───────┘     │    │  🟠 Orange (D9 → IN3)
+      (5V → VCC)          │    │  🟠 Orange (D10 → IN4)
+                          │    │
+      ⚫ Black ───────────┘    │
+      (GND → GND)              │
+                               │
+                     ┌─────────┴─────────┐
+                     │                   │
+                     ▼                   ▼
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                     4-CHANNEL RELAY MODULE                      │
+    │                                                                 │
+    │   [RELAY 1]      [RELAY 2]      [RELAY 3]      [RELAY 4]        │
+    │      💡             💡             💡             💡  ← LEDs  │
+    │                                                                 │
+    │   ┌─────────────────────────────────────────────────────────┐   │
+    │   │  IN1    IN2    IN3    IN4    VCC    GND                 │   │
+    │   │   ●      ●      ●      ●      ●      ●                  │   │
+    │   └───┼──────┼──────┼──────┼──────┼──────┼──────────────────┘   │
+    │       │      │      │      │      │      │                      │
+    └───────┼──────┼──────┼──────┼──────┼──────┼──────────────────────┘
+            │      │      │      │      │      │
+            │      │      │      │      │      │
+          🟠│   🟠│   🟠│    🟠│   🔴│    ⚫│
+         from   from   from   from   from   from
+          D7     D8     D9    D10     5V    GND
+```
+
+---
+
+### Drawing 2: AC 220V Water Pump with Wall Outlet (Relay 1)
+
+```
+    ⚠️ HIGH VOLTAGE - 220V AC ⚠️
+    
+    
+    ══════════════════════════════════════════════════════════════════════
+    
+           WALL OUTLET                                      WATER PUMP
+          ┌──────────┐                                    ┌───────────┐
+          │  ┌───┐   │                                    │  ～～～   │
+          │  │ L │●──┼── LIVE (Brown) ──────┐             │ ～MOTOR～ │
+          │  ├───┤   │                      │             │  ～～～   │
+          │  │ N │●──┼── NEUTRAL (Blue) ────┼─────┐       │     ║     │
+          │  ├───┤   │                      │     │       │  ┌──╨──┐  │
+          │  │ ⏚ │●  │  (Earth - optional)  │     │       │  │INLET│  │
+          │  └───┘   │                      │     │       └──┴─────┴──┘
+          └──────────┘                      │     │            │
+                                            │     │            │ Water flow
+               PUMP POWER CORD              │     │            ▼
+              (cut in middle)               │     │       ───────────
+                    ✂️                      │     │
+                                            │     │
+        Plug side ─────┬──LIVE (Brown)──────┘     │
+                       │                          │
+                       └──NEUTRAL (Blue)──────────┼───────────────────┐
+                                                  │                   │
+                                                  │                   │
+        Pump side ─────┬──LIVE (Brown)────────────┼───────┐           │
+                       │                          │       │           │
+                       └──NEUTRAL (Blue)──────────┼───────┼───────────┘
+                                                  │       │      Reconnect
+                                                  │       │      NEUTRAL
+                                            ┌─────┴───────┴─────┐ (splice)
+                                            │   RELAY MODULE    │
+                                            │     RELAY 1       │
+                                            │   ┌─────────┐     │
+                                            │   │ NC      │     │
+                   From plug LIVE ─────────►│   │ COM ────┼─────┼─► To pump LIVE
+                   (Brown wire)             │   │ NO      │     │   (Brown wire)
+                                            │   └─────────┘     │
+                                            │                   │
+                                            └───────────────────┘
+    
+    
+    WIRE PATH (Follow the arrows):
+    ═══════════════════════════════
+    
+        LIVE:     Outlet → Plug → [CUT] → COM1 → NO1 → [CUT] → Pump
+        NEUTRAL:  Outlet → Plug → [CUT] → Splice together → [CUT] → Pump
+                                         (bypasses relay)
+    
+    
+    ⚠️ SAFETY REMINDER:
+    ┌────────────────────────────────────────────────────────────────────┐
+    │  • Only LIVE wire goes through relay (gets switched ON/OFF)        │
+    │  • NEUTRAL wire is spliced directly (never goes through relay)     │
+    │  • Always UNPLUG from wall before touching any wires!              │
+    │  • Use electrical tape or heat shrink on all exposed connections   │
+    └────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Drawing 3: 12V DC Adapter with 3 Peristaltic Pumps (U-Connection)
+
+```
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │                                                                     │
+    │    12V DC ADAPTER                                                   │
+    │    ══════════════                                                   │
+    │                                                                     │
+    │    ┌───────────────┐                                                │
+    │    │   ████████    │◄── Plugs into wall outlet (AC 220V input)      │
+    │    │   ████████    │                                                │
+    │    │   ████████    │                                                │
+    │    │   ▓▓▓▓▓▓▓▓    │                                                │
+    │    │   12V  1A     │◄── Check: at least 1A output for 3 pumps       │
+    │    │   DC ADAPTER  │                                                │
+    │    └───────┬───────┘                                                │
+    │            │                                                        │
+    │            │ Output cable                                           │
+    │            │                                                        │
+    │     ┌──────┴──────┐                                                 │
+    │     │ ✂️ CUT HERE │                                                 │
+    │     └──────┬──────┘                                                 │
+    │            │                                                        │
+    │     ┌──────┴──────┐                                                 │
+    │     │ (+)     (-) │                                                 │
+    │     │ RED   BLACK │                                                 │
+    │     └──┬───────┬──┘                                                 │
+    │        │       │                                                    │
+    └────────┼───────┼────────────────────────────────────────────────────┘
+             │       │
+             │       │
+             ▼       ▼
+    
+    
+    ═══════════════════════════════════════════════════════════════════════
+                            WIRING TO RELAY MODULE
+    ═══════════════════════════════════════════════════════════════════════
+    
+    
+       12V (+) RED                              12V (-) BLACK
+           │                                        │
+           │                                        │
+           │                                   ┌────┴────┐
+           │                                   │ SPLICE  │ (3-way split)
+           │                                   │ ┌─┬─┬─┐ │
+           │                                   └─┼─┼─┼─┘
+           │                                     │ │ │
+           │                                     │ │ └──────────────────┐
+           │                                     │ └────────────┐       │
+           │                                     │              │       │
+           │                                     │              │       │
+           ▼                                     │              │       │
+    ┌───────────────────────────────────────────┐│              │       │
+    │           4-CHANNEL RELAY MODULE          ││              │       │
+    │                                           ││              │       │
+    │   RELAY 1    RELAY 2    RELAY 3   RELAY 4 ││              │       │
+    │   (AC 220V)  (DC 12V)   (DC 12V)  (DC 12V)││              │       │
+    │                                           ││              │       │
+    │   ┌─────┐    ┌─────┐    ┌─────┐   ┌─────┐ ││              │       │
+    │   │ NC  │    │ NC  │    │ NC  │   │ NC  │ ││              │       │
+    │   │ COM │    │ COM │════│ COM │═══│ COM │ ││              │       │
+    │   │ NO  │    │ NO  │    │ NO  │   │ NO  │ ││              │       │
+    │   └──┬──┘    └──┬──┘    └──┬──┘   └──┬──┘ ││              │       │
+    │      │   12V(+)─┴─jumper──┴─jumper──┴     ││              │       │
+    │      │          ▲                         ││              │       │
+    │      │          │                         ││              │       │
+    └──────┼──────────┼─────────────────────────┘│              │       │
+           │          │                          │              │       │
+    (AC)   │          └──────────────────────────┼──────────────┼───────┼──── 12V(+) RED
+           │                                     │              │       │
+           │                                     │              │       │
+           ▼                                     ▼              ▼       ▼
+    ┌────────────┐                   ┌────────────┐  ┌────────────┐  ┌────────────┐
+    │            │                   │  NUTRIENT  │  │  NUTRIENT  │  │   REFILL   │
+    │   WATER    │                   │    A       │  │    B       │  │   PUMP     │
+    │   PUMP     │                   │   PUMP     │  │   PUMP     │  │            │
+    │  (AC 220V) │                   │ (Perist.)  │  │ (Perist.)  │  │ (Perist.)  │
+    │            │                   │            │  │            │  │            │
+    │    ⚡🌊   │                   │   (+)(-)   │  │   (+)(-)   │  │   (+)(-)   │
+    │            │                   │    │  │    │  │    │  │    │  │    │  │    │
+    └────────────┘                   └────┼──┼────┘  └────┼──┼────┘  └────┼──┼────┘
+                                          │  │            │  │            │  │
+                                    from  │  │       from │  │       from │  │
+                                    NO2 ──┘  │      NO3 ──┘  │      NO4 ──┘  │
+                                             │               │               │
+                                             └───────────────┴───────────────┘
+                                                             │
+                                                             │
+                                                     All (-) to 12V GND
+```
+
+
+
+---
+
+### Drawing 4: U-Connection Close-Up (Relay COM Terminals)
+
+```
+    U-CONNECTION DETAIL (Top View of Relay Screw Terminals)
+    ═══════════════════════════════════════════════════════
+    
+    
+                    12V Adapter (+) RED wire
+                            │
+                            │
+                            ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │                                                             │
+    │     RELAY 2          RELAY 3          RELAY 4               │
+    │   ┌─────────┐      ┌─────────┐      ┌─────────┐             │
+    │   │  ○ NC   │      │  ○ NC   │      │  ○ NC   │             │
+    │   │         │      │         │      │         │             │
+    │   │  ● COM ─┼──────┼─ ● COM ─┼──────┼─ ● COM  │             │
+    │   │    ▲    │~3cm  │    ▲    │~3cm  │         │             │
+    │   │    │    │jumper│    │    │jumper│         │             │
+    │   │    │    │      │    │    │      │         │             │
+    │   │  ● NO   │      │  ● NO   │      │  ● NO   │             │
+    │   │    │    │      │    │    │      │    │    │             │
+    │   └────┼────┘      └────┼────┘      └────┼────┘             │
+    │        │                │                │                  │
+    │        ▼                ▼                ▼                  │
+    │     To Pump          To Pump          To Pump               │
+    │     A (+)            B (+)            Refill (+)            │
+    │                                                             │
+    └─────────────────────────────────────────────────────────────┘
+    
+    
+    JUMPER WIRE DETAIL:
+    ════════════════════
+    
+         ┌──── ~3cm wire ────┐      ┌──── ~3cm wire ────┐
+         │                   │      │                   │
+      [COM2]══════════════[COM3]══════════════════[COM4]
+         │                   ▲                         │
+         │                   │                         │
+         │            12V(+) enters                    │
+         │            here (center)                    │
+         │                                             │
+       strip                                        strip
+       wire                                         wire
+       ends                                         ends
+```
 
 ---
 
@@ -282,26 +695,26 @@ TOP VIEW OF 4-CHANNEL RELAY MODULE:
 ═══════════════════════════════════════════════════════════════
 
     ┌─────────────────────────────────────────────────────┐
-    │  [RELAY 1]    [RELAY 2]    [RELAY 3]    [RELAY 4]  │
+    │  [RELAY 1]    [RELAY 2]    [RELAY 3]    [RELAY 4]   │
     │    LED          LED          LED          LED       │
     │     ●            ●            ●            ●        │
     │                                                     │
-    │  Terminal Blocks (High Voltage Side - Pumps):     │
-    │  ┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐      │
-    │  │ NC   │    │ NC   │    │ NC   │    │ NC   │      │
-    │  │ COM  │    │ COM  │    │ COM  │    │ COM  │      │ ← 12V+ here
-    │  │ NO   │    │ NO   │    │ NO   │    │ NO   │      │ ← Pumps here
-    │  └──────┘    └──────┘    └──────┘    └──────┘      │
+    │  Terminal Blocks (High Voltage Side - Pumps):       │
+    │  ┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐       │
+    │  │ NC   │    │ NC   │    │ NC   │    │ NC   │       │
+    │  │ COM  │    │ COM  │    │ COM  │    │ COM  │       │ ← 12V+ here
+    │  │ NO   │    │ NO   │    │ NO   │    │ NO   │       │ ← Pumps here
+    │  └──────┘    └──────┘    └──────┘    └──────┘       │
     │                                                     │
-    │  Control Pins (Low Voltage Side - Arduino):        │
-    │  ┌─────┬─────┬─────┬─────┬─────┬─────┐             │
-    │  │ IN1 │ IN2 │ IN3 │ IN4 │ VCC │ GND │             │
-    │  │  ●  │  ●  │  ●  │  ●  │  ●  │  ●  │             │
-    │  └─────┴─────┴─────┴─────┴─────┴─────┘             │
-    │    │     │     │     │     │     │                 │
-    │    D7    D8    D9   D10   5V   GND  ← To Arduino  │
+    │  Control Pins (Low Voltage Side - Arduino):         │
+    │  ┌─────┬─────┬─────┬─────┬─────┬─────┐              │
+    │  │ IN1 │ IN2 │ IN3 │ IN4 │ VCC │ GND │              │
+    │  │  ●  │  ●  │  ●  │  ●  │  ●  │  ●  │              │
+    │  └─────┴─────┴─────┴─────┴─────┴─────┘              │
+    │    │     │     │     │     │     │                  │
+    │    D7    D8    D9   D10   5V   GND  ← To Arduino    │
     │                                                     │
-    │  [JD-VCC Jumper] ← Usually installed              │
+    │  [JD-VCC Jumper] ← Usually installed                │
     │                                                     │
     └─────────────────────────────────────────────────────┘
 ```
@@ -338,68 +751,88 @@ TOP VIEW OF 4-CHANNEL RELAY MODULE:
 
 ---
 
-## Detailed Wiring Diagram - Relay & Pumps
+## Detailed Wiring Diagram - Relay & Pumps (YOUR ACTUAL SETUP)
 
 ```
-                                    12V POWER SUPPLY
-                              ┌──────────┴──────────┐
-                              │(+)               (-) │
-                              │                      │
-     ┌────────────────────────┼──────────────────────┼─────────────────────────┐
-     │                        │                      │                         │
-     │   ┌────────────────────┴────────────────────┐ │                         │
-     │   │          12V DISTRIBUTION               │ │                         │
-     │   │  ┌─────┬─────┬─────┬─────┐              │ │                         │
-     │   │  │     │     │     │     │              │ │                         │
-     │   └──┼─────┼─────┼─────┼─────┼──────────────┘ │                         │
-     │      │     │     │     │                      │                         │
-     │      ▼     ▼     ▼     ▼                      │                         │
-     │  ┌───────────────────────────────────────────────────────────────────┐  │
-     │  │                    4-CHANNEL RELAY MODULE                         │  │
-     │  │                                                                   │  │
-     │  │   ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ │  │
-     │  │   │  RELAY 1    │ │  RELAY 2    │ │  RELAY 3    │ │  RELAY 4    │ │  │
-     │  │   │  (Water)    │ │  (Nut A)    │ │  (Nut B)    │ │  (Refill)   │ │  │
-     │  │   │             │ │             │ │             │ │             │ │  │
-     │  │   │ COM ← 12V+  │ │ COM ← 12V+  │ │ COM ← 12V+  │ │ COM ← 12V+  │ │  │
-     │  │   │ NO  → Pump+ │ │ NO  → Pump+ │ │ NO  → Pump+ │ │ NO  → Pump+ │ │  │
-     │  │   │ NC  (unused)│ │ NC  (unused)│ │ NC  (unused)│ │ NC  (unused)│ │  │
-     │  │   └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ │  │
-     │  │          │               │               │               │        │  │
-     │  │   ┌──────┴───────────────┴───────────────┴───────────────┴─────┐  │  │
-     │  │   │  IN1   IN2   IN3   IN4   VCC   GND                         │  │  │
-     │  │   │   │     │     │     │     │     │                          │  │  │
-     │  │   └───┼─────┼─────┼─────┼─────┼─────┼──────────────────────────┘  │  │
-     │  │       │     │     │     │     │     │                             │  │
-     │  └───────┼─────┼─────┼─────┼─────┼─────┼─────────────────────────────┘  │
-     │          │     │     │     │     │     │                                │
-     │          │     │     │     │     │     │      TO ARDUINO:               │
-     │          │     │     │     │     │     │      ────────────              │
-     │          │     │     │     │     │     └─────── GND                     │
-     │          │     │     │     │     └─────────── 5V                        │
-     │          │     │     │     └──────────────── D10                        │
-     │          │     │     └───────────────────── D9                          │
-     │          │     └────────────────────────── D8                           │
-     │          └─────────────────────────────── D7                            │
-     │                                                                         │
-     │      ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐             │
-     │      │  WATER   │  │NUTRIENT A│  │NUTRIENT B│  │  WATER   │             │
-     │      │  PUMP    │  │  PUMP    │  │  PUMP    │  │  REFILL  │             │
-     │      │  (15W)   │  │(Perist.) │  │(Perist.) │  │  PUMP    │             │
-     │      │          │  │          │  │          │  │          │             │
-     │      │ (+)  (-) │  │ (+)  (-) │  │ (+)  (-) │  │ (+)  (-) │             │
-     │      └──┬────┬──┘  └──┬────┬──┘  └──┬────┬──┘  └──┬────┬──┘             │
-     │         │    │        │    │        │    │        │    │                │
-     │  From   │    │        │    │        │    │        │    │                │
-     │  R1 NO ─┘    │        │    │        │    │        │    │                │
-     │  From R2 NO ─┼────────┘    │        │    │        │    │                │
-     │  From R3 NO ─┼─────────────┼────────┘    │        │    │                │
-     │  From R4 NO ─┼─────────────┼─────────────┼────────┘    │                │
-     │              │             │             │             │                │
-     │              └─────────────┴─────────────┴─────────────┴────────────────┤
-     │                         All Pump (-) to 12V GND                         │
-     └─────────────────────────────────────────────────────────────────────────┘
+    AC 220V OUTLET                              12V DC ADAPTER
+    ══════════════                              ══════════════
+         │                                           │
+    LIVE │ NEUTRAL                            (+)RED │ (-)BLACK
+         │ │                                         │ │
+         │ │                                    ┌────┘ └──────────────────┐
+         │ │                                    │                         │
+         ▼ │                                    ▼                         │
+    ┌──────┼───────────────────────────────────────────────────────────┐  │
+    │      │          4-CHANNEL RELAY MODULE                           │  │
+    │      │                                                           │  │
+    │  ┌───┼───────────┐ ┌─────────────┐ ┌─────────────┐ ┌───────────┐ │  │
+    │  │ RELAY 1       │ │  RELAY 2    │ │  RELAY 3    │ │  RELAY 4  │ │  │
+    │  │ ⚡AC 220V     │ │  DC 12V     │ │  DC 12V     │ │  DC 12V   │ │  │
+    │  │ (Water Pump)  │ │  (Nut A)    │ │  (Nut B)    │ │  (Refill) │ │  │
+    │  │               │ │             │ │             │ │           │ │  │
+    │  │COM←AC LIVE    │ │ COM ◄═══════╪═╪═══► COM ◄═══╪═╪══► COM    │ │  │
+    │  │NO →Pump LIVE  │ │ NO →Pump+   │ │ NO →Pump+   │ │ NO→Pump+  │ │  │
+    │  │NC  (unused)   │ │ NC (unused) │ │ NC (unused) │ │NC(unused) │ │  │
+    │  └───┬───────────┘ └──────┬──────┘ └──────┬──────┘ └─────┬─────┘ │  │
+    │      │                    │               │              │       │  │
+    │      │               U-CONNECTION: 12V(+) enters one COM,        │  │
+    │      │               then jumps to adjacent COMs (~3cm wires)    │  │
+    │      │                    │               │              │       │  │
+    │  ┌───┴────────────────────┴───────────────┴──────────────┴────┐  │  │
+    │  │   IN1   IN2   IN3   IN4   VCC   GND                        │  │  │
+    │  │    │     │     │     │     │     │                         │  │  │
+    │  └────┼─────┼─────┼─────┼─────┼─────┼─────────────────────────┘  │  │
+    │       │     │     │     │     │     │                            │  │
+    └───────┼─────┼─────┼─────┼─────┼─────┼────────────────────────────┘  │
+            │     │     │     │     │     │       TO ARDUINO:             │
+            │     │     │     │     │     └────► GND                      │
+            │     │     │     │     └──────────► 5V                       │
+            │     │     │     └────────────────► D10                      │
+            │     │     └──────────────────────► D9                       │
+            │     └────────────────────────────► D8                       │
+            └──────────────────────────────────► D7                       │
+                                                                          │
+        ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+        │  WATER   │  │NUTRIENT A│  │NUTRIENT B│  │  REFILL  │            │
+        │  PUMP    │  │  PUMP    │  │  PUMP    │  │  PUMP    │            │
+        │⚡AC 220V │  │ DC 12V   │  │ DC 12V   │  │ DC 12V   │            │
+        │  (15W)   │  │(Perist.) │  │(Perist.) │  │(Perist.) │            │
+        │          │  │          │  │          │  │          │            │
+        │  ●   ●   │  │ (+)  (-) │  │ (+)  (-) │  │ (+)  (-) │            │
+        └──┼───┼───┘  └──┬────┬──┘  └──┬────┬──┘  └──┬────┬──┘            │
+           │   │         │    │        │    │        │    │               │
+      From │   │    From │    │   From │    │   From │    │               │
+      NO1 ─┘   │    NO2 ─┘    │   NO3 ─┘    │   NO4 ─┘    │               │
+               │              │            │              │               │
+    AC NEUTRAL ┘              └────────────┴──────────────┴───────────────┤
+    (direct, uncut)                   All DC pump (-) to 12V GND ─────────┘
 ```
+
+---
+
+## 📊 COMPLETE WIRING SUMMARY TABLE
+
+| Connection | From | To | Wire Color | Notes |
+|------------|------|-----|------------|-------|
+| **Control Side (Arduino → Relay)** |
+| Signal | Arduino D7 | Relay IN1 | Orange | Water pump control |
+| Signal | Arduino D8 | Relay IN2 | Orange | Nut A control |
+| Signal | Arduino D9 | Relay IN3 | Orange | Nut B control |
+| Signal | Arduino D10 | Relay IN4 | Orange | Refill control |
+| Power | Arduino 5V | Relay VCC | Red | Powers relay coils |
+| Ground | Arduino GND | Relay GND | Black | Common ground |
+| **Relay 1 - AC Water Pump (220V)** |
+| Live | Outlet LIVE | Relay COM1 | Brown | **⚠️ HIGH VOLTAGE!** |
+| Switched | Relay NO1 | Pump wire | Brown | Cut from LIVE |
+| Neutral | Outlet | Pump wire | Blue | Direct (uncut) |
+| **Relays 2,3,4 - DC Peristaltic (12V)** |
+| 12V+ | Adapter (+) | Relay COM3 | Red | Center COM |
+| Jumper | COM2 | COM3 | Red | ~3cm wire |
+| Jumper | COM3 | COM4 | Red | ~3cm wire |
+| Pump+ | Relay NO2 | Nut A (+) | Red | Switched power |
+| Pump+ | Relay NO3 | Nut B (+) | Red | Switched power |
+| Pump+ | Relay NO4 | Refill (+) | Red | Switched power |
+| 12V- | Adapter (-) | All pump (-) | Black | Spliced 3-way |
 
 ---
 
@@ -446,14 +879,16 @@ TOP VIEW OF 4-CHANNEL RELAY MODULE:
 | Color | Purpose | Voltage |
 |-------|---------|---------|
 | 🔴 **Red** | +5V Power (Arduino/Sensors) | 5V DC |
-| ⚫ **Black** | Ground (All) | 0V |
+| ⚫ **Black** | Ground (All DC) | 0V |
 | 🟢 **Green** | pH Sensor Signal | 0-5V Analog |
 | 🟡 **Yellow** | TDS Sensor / Temp Sensor Signal | 0-5V |
-| 🔵 **Blue** | I2C SDA (LCD Data) | Digital |
+| 🔵 **Blue** | I2C SDA (LCD Data) / AC Neutral | Digital / 220V |
 | 🟣 **Purple** | I2C SCL (LCD Clock) | Digital |
 | 🟠 **Orange** | Relay Control Signals | 0-5V Digital |
-| 🔴 **Red (thick)** | +12V Power (Pumps) | 12V DC |
-| ⚫ **Black (thick)** | 12V Ground (Pumps) | 0V |
+| 🔴 **Red (thick)** | +12V Power (Peristaltic Pumps) | 12V DC |
+| ⚫ **Black (thick)** | 12V Ground (Peristaltic Pumps) | 0V |
+| 🟤 **Brown (thick)** | AC LIVE (Water Pump) | ⚠️ 220V AC |
+| 🔵 **Blue (thick)** | AC NEUTRAL (Water Pump) | ⚠️ 220V AC |
 
 ---
 
@@ -481,17 +916,31 @@ TOP VIEW OF 4-CHANNEL RELAY MODULE:
 
 ## Safety Checklist Before Power-On
 
-- [ ] All GND wires connected to common ground
+### ⚠️ AC 220V SAFETY (CRITICAL!)
+- [ ] **UNPLUG AC before ANY wiring changes!**
+- [ ] AC LIVE goes through relay COM1 → NO1 only
+- [ ] AC NEUTRAL goes DIRECTLY to pump (never through relay)
+- [ ] All AC connections properly insulated (heat shrink/electrical tape)
+- [ ] No exposed copper on AC wires
+- [ ] Keep AC wires away from DC wires
+
+### Arduino & Sensors (5V DC)
+- [ ] All DC GND wires connected to common ground
 - [ ] **Relay VCC connected to Arduino 5V** ✅
 - [ ] **Relay GND connected to Arduino GND** ✅
 - [ ] 5V connections only to low-power components (sensors, LCD, relay logic)
-- [ ] 12V connections only to pump circuits via relay
 - [ ] 4.7kΩ pull-up resistor installed on DS18B20 data line
-- [ ] Relay COM terminals connected to 12V+
-- [ ] Relay NO terminals connected to pump (+) wires
-- [ ] All pump (-) wires connected to 12V GND
+
+### Peristaltic Pumps (12V DC with U-Connection)
+- [ ] 12V adapter (+) connected to center COM (e.g., COM3)
+- [ ] U-jumpers connecting COM2↔COM3↔COM4 (~3cm wires)
+- [ ] Relay NO2, NO3, NO4 terminals connected to pump (+) wires
+- [ ] All 3 pump (-) wires spliced to 12V adapter (-)
+
+### General Safety
 - [ ] No bare wires touching each other
 - [ ] Electronics box is waterproof and elevated
+- [ ] Test DC circuits BEFORE connecting AC
 
 ---
 
@@ -523,9 +972,17 @@ TOP VIEW OF 4-CHANNEL RELAY MODULE:
 
 ### Q5: My relay clicks but pump doesn't run. Why?
 **A:** Check these in order:
-1. Is 12V+ connected to relay COM terminal?
-2. Is pump (+) wire connected to relay NO terminal?
-3. Is pump (-) wire connected to 12V GND?
+
+**For AC Water Pump (Relay 1):**
+1. Is AC LIVE connected to relay COM1?
+2. Is pump LIVE wire connected to relay NO1?
+3. Is pump NEUTRAL connected directly to outlet NEUTRAL?
+4. Test pump: plug directly into outlet (bypassing relay)
+
+**For 12V Peristaltic Pumps (Relays 2-4):**
+1. Is 12V+ connected via U-jumpers to all COM terminals?
+2. Is pump (+) wire connected to correct relay NO terminal?
+3. Is pump (-) wire spliced to 12V GND?
 4. Test pump directly: connect pump (+) to 12V+ and pump (-) to 12V GND
 
 ### Q6: Can I use 3 relays for v1.0 instead of 4?
@@ -568,34 +1025,40 @@ TOTAL SYSTEM POWER REQUIREMENTS:
 ═══════════════════════════════════════════════════════════
 
 5V Circuit (Arduino side):
-┌────────────────────────────────────────────┐
-│ Arduino Uno           50 mA               │
-│ LCD 20x4 I2C          20 mA               │
-│ pH Sensor              5 mA               │
-│ TDS Sensor             5 mA               │
-│ DS18B20 Temp           5 mA               │
-│ Relay Module (4ch)    80 mA               │
-├────────────────────────────────────────────┤
-│ TOTAL 5V:            165 mA ✅ OK         │
-│ (Arduino 5V pin provides up to 500mA)     │
-└────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│ Arduino Uno           50 mA                 │
+│ LCD 20x4 I2C          20 mA                 │
+│ pH Sensor              5 mA                 │
+│ TDS Sensor             5 mA                 │
+│ DS18B20 Temp           5 mA                 │
+│ Relay Module (4ch)    80 mA                 │
+├─────────────────────────────────────────────┤
+│ TOTAL 5V:            165 mA ✅ OK           │
+│ (Arduino 5V pin provides up to 500mA)       │
+└─────────────────────────────────────────────┘
 
-12V Circuit (Pump side):
-┌────────────────────────────────────────────┐
-│ Water Pump (15W)      1.25 A              │
-│ Peristaltic A          0.2 A              │
-│ Peristaltic B          0.2 A              │
-│ Refill Pump            0.3 A              │
-├────────────────────────────────────────────┤
-│ TOTAL 12V:           1.95 A peak          │
-│ (Only 1 pump runs at a time typically)    │
-│ Recommend: 12V 2A power supply            │
-└────────────────────────────────────────────┘
+AC 220V Circuit (Water Pump via Relay 1):
+┌─────────────────────────────────────────────┐
+│ Water Pump (15W)      ~0.07 A @ 220V        │
+│ ⚠️ Switched through Relay 1 COM→NO         │
+│ NEUTRAL goes direct (never through relay)   │
+└─────────────────────────────────────────────┘
+
+12V DC Circuit (Peristaltic Pumps via Relays 2-4):
+┌─────────────────────────────────────────────┐
+│ Peristaltic A          0.2 A                │
+│ Peristaltic B          0.2 A                │
+│ Refill Pump            0.3 A                │
+├─────────────────────────────────────────────┤
+│ TOTAL 12V:           0.7 A peak             │
+│ (With U-connection sharing one adapter)     │
+│ Recommend: 12V 1A adapter (minimum)         │
+└─────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🎯 TL;DR - The Critical Connections You Asked About
+## 🎯 TL;DR - The Critical Connections (YOUR ACTUAL SETUP)
 
 ### YES, Relay VCC and GND MUST Connect to Arduino!
 
@@ -603,56 +1066,67 @@ TOTAL SYSTEM POWER REQUIREMENTS:
 ┌─────────────────────────────────────────────────────────────────┐
 │                    THE SIMPLE ANSWER:                           │
 │                                                                 │
-│  RELAY MODULE has 6 control pins that ALL go to ARDUINO:       │
+│  RELAY MODULE has 6 control pins that ALL go to ARDUINO:        │
 │                                                                 │
-│     Relay VCC  ──────────► Arduino 5V                          │
-│     Relay GND  ──────────► Arduino GND                         │
-│     Relay IN1  ──────────► Arduino D7                          │
-│     Relay IN2  ──────────► Arduino D8                          │
-│     Relay IN3  ──────────► Arduino D9                          │
-│     Relay IN4  ──────────► Arduino D10                         │
+│     Relay VCC  ──────────► Arduino 5V                           │
+│     Relay GND  ──────────► Arduino GND                          │
+│     Relay IN1  ──────────► Arduino D7  (AC Water Pump)          │
+│     Relay IN2  ──────────► Arduino D8  (DC Nut A)               │
+│     Relay IN3  ──────────► Arduino D9  (DC Nut B)               │
+│     Relay IN4  ──────────► Arduino D10 (DC Refill)              │
 │                                                                 │
-│  That's 6 wires total from Arduino to Relay Module.            │
-│                                                                 │
-│  Then SEPARATELY, on the other side of the relay module:       │
-│                                                                 │
-│     12V Supply (+) ──────► All 4 COM terminals                 │
-│     Relay NO terminals ──► Individual pump (+) wires           │
-│     All pump (-) wires ──► 12V Supply (-)                      │
+│  That's 6 wires total from Arduino to Relay Module.             │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Visual Summary of Complete Relay Wiring:
+### Visual Summary - YOUR AC + DC Setup with U-Connection:
 
 ```
-        ARDUINO                RELAY MODULE              12V & PUMPS
-        ═══════                ════════════              ═══════════
+        ARDUINO                RELAY MODULE                POWER & PUMPS
+        ═══════                ════════════                ═════════════
         
          [5V]  ────────────►  [VCC]
          
          [GND] ────────────►  [GND]
          
-         [D7]  ────────────►  [IN1]     [COM]◄──────── 12V(+)
-                                        [NO] ───────► Water Pump(+)
-                                        [NC]  unused
+         [D7]  ────────────►  [IN1]     [COM1]◄───────── AC LIVE (220V)
+                                        [NO1] ────────► Water Pump (LIVE)
+                                        [NC1]  unused
+                                        Water Pump NEUTRAL → direct to outlet
          
-         [D8]  ────────────►  [IN2]     [COM]◄──────── 12V(+)
-                                        [NO] ───────► Nut A Pump(+)
-                                        [NC]  unused
+         [D8]  ────────────►  [IN2]     [COM2]◄══╗
+                                        [NO2] ───╫────► Nut A Pump(+)
+                                        [NC2]    ║ unused
+                                                 ║
+         [D9]  ────────────►  [IN3]     [COM3]◄══╬═════ 12V(+) adapter
+                                        [NO3] ───╫────► Nut B Pump(+)
+                                        [NC3]    ║ unused
+                                                 ║ U-JUMPERS
+         [D10] ────────────►  [IN4]     [COM4]◄══╝ (~3cm wires)
+                                        [NO4] ────────► Refill Pump(+)
+                                        [NC4]  unused
          
-         [D9]  ────────────►  [IN3]     [COM]◄──────── 12V(+)
-                                        [NO] ───────► Nut B Pump(+)
-                                        [NC]  unused
-         
-         [D10] ────────────►  [IN4]     [COM]◄──────── 12V(+)
-                                        [NO] ───────► Refill Pump(+)
-                                        [NC]  unused
-         
-                                                All Pumps(-) ──► 12V(-)
+                                        All 3 DC Pumps(-) spliced ──► 12V(-)
 ```
 
-**Remember:** The relay module acts like a remote-controlled light switch. Arduino provides the "button press" (5V signal), and the relay switches the "lights" (12V pumps) on/off. The two circuits never directly touch - they're magnetically coupled inside the relay!
+### U-Connection Explained:
+```
+    12V Adapter (+) ─────┐
+                         ▼
+    [COM2] ◄══ jumper ══[COM3]══ jumper ══► [COM4]
+       │                   ▲                    │
+       │          12V enters here               │
+       │          (center COM)                  │
+       ▼                                        ▼
+    [NO2]→Pump A(+)                       [NO4]→Refill(+)
+                   [NO3]→Pump B(+)
+```
+
+**Remember:** 
+- **AC Circuit (Relay 1):** Switches mains voltage - LIVE through relay, NEUTRAL direct
+- **DC Circuit (Relays 2-4):** U-connection shares one 12V+ wire across 3 relays
+- The relay module acts like remote-controlled switches - Arduino provides the 5V control signal, relays switch high-power loads!
 
 ---
 
