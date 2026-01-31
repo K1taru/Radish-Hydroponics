@@ -1,49 +1,53 @@
+# Radish Hydroponics: Materials and System Guide
 
-| Materials                              | Quantity |
-|----------------------------------------|----------|
-| pH Test Strips (used manually for test)| 100 pcs  |
-| Nutrient Solution (RAMGO HydroGro)     | 1 pc     |
-| Net Pots                               | 12 pcs   |
-| Water Pump with Water Inlet (15W)      | 2 pcs    |
-| Water hose                             | 1 pc     |
-| PVC Pipe                               | 3 pcs    |
-| Plastic container                      | 1 pc     |
-| Radish Seeds                           | 2 pcs    |
-| Plastic Bucket                         | 1 pc     |
-| Electrical Box                         | 1 pc     |
-| Arduino Uno                            | 1 pc     |
-| Loam soil                              | 1 pc     |
-| 4 Relay Module                         | 1 pc     |
-| pH sensor                              | 1 pc     |
-| TDS Sensor Board                       | 1 pc     |
-| Temperature Sensor                     | 1 pc     |
-| ESP32 Board                            | 1 pc     |
-| LED Display                            | 1 pc     |
-| LCD Display 4 lines                    | 1 pc     |
-| Peristaltic Pump                       | 2 pcs    |
-| Power Adapter                          | 1 pc     |
-| Breadboard                             | 1 pc     |
-| Jumper Wires                           | pcs      |
-| Silicone tube                          | 1 pc     |
-| Wooden box                             | 1 pc     |
+## Materials List
+
+| Materials                                           | Quantity |
+|-----------------------------------------------------|----------|
+| pH Test Strips (used manually for test)             | 100 pcs  |
+| Nutrient Solution (RAMGO HydroGro)                  | 1 pc     |
+| Net Pots                                            | 12 pcs   |
+| Water Pump with Water Inlet (15W)                   | 2 pcs    |
+| Water hose                                          | 1 pc     |
+| PVC Pipe                                            | 3 pcs    |
+| Plastic container                                   | 1 pc     |
+| Radish Seeds                                        | 2 pcs    |
+| Plastic Bucket                                      | 1 pc     |
+| Electrical Box                                      | 1 pc     |
+| Arduino Uno                                         | 1 pc     |
+| Loam soil                                           | 1 pc     |
+| 4 Relay Module                                      | 1 pc     |
+| pH sensor                                           | 1 pc     |
+| TDS Sensor Board                                    | 1 pc     |
+| DS18B20 Temperature Sensor                          | 1 pc     |
+| ESP32 Board                                         | 1 pc     |
+| LED Display                                         | 1 pc     |
+| LCD Display 4 lines                                 | 1 pc     |
+| Peristaltic Pump                                    | 2 pcs    |
+| Power Adapter                                       | 1 pc     |
+| Breadboard                                          | 1 pc     |
+| Jumper Wires                                        | pcs      |
+| Silicone tube                                       | 1 pc     |
+| Wooden box                                          | 1 pc     |
+| 128x64 1.3" OLED Display SH1106 <Adafruit_SH110X.h> | 1 pc     |
 
 ## Tech & Arduino-Related Materials
 
-| Materials            | Quantity |
-|----------------------|----------|
-| Arduino Uno          | 1 pc     |
-| ESP32 Board          | 1 pc     |
-| Relay Module (4ch)   | 1 pc     |
-| pH sensor            | 1 pc     |
-| TDS Sensor Board     | 1 pc     |
-| Temperature Sensor   | 1 pc     |
-| LED Display          | 1 pc     |
-| LCD Display 4 lines  | 1 pc     |
-| Peristaltic Pump     | 2 pcs    |
-| Water Refill Pump    | 1 pc     |
-| Power Adapter        | 1 pc     |
-| Breadboard           | 1 pc     |
-| Jumper Wires         | pcs      |
+| Materials                | Quantity |
+|--------------------------|----------|
+| Arduino Uno              | 1 pc     |
+| ESP32 Board              | 1 pc     |
+| Relay Module (4ch)       | 1 pc     |
+| pH sensor                | 1 pc     |
+| TDS Sensor Board         | 1 pc     |
+| DS18B20 Temp Sensor      | 1 pc     |
+| LED Display              | 1 pc     |
+| LCD Display 4 lines      | 1 pc     |
+| Peristaltic Pump         | 2 pcs    |
+| Water Refill Pump        | 1 pc     |
+| Power Adapter            | 1 pc     |
+| Breadboard               | 1 pc     |
+| Jumper Wires             | pcs      |
 
 ---
 

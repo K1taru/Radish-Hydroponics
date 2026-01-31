@@ -2,7 +2,7 @@
 
 #include <Wire.h>
 #include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include <Adafruit_SH110X.h>  
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -54,7 +54,7 @@
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
 #define OLED_ADDRESS 0x3C
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 OneWire oneWire(TEMP_SENSOR_PIN);
 DallasTemperature tempSensor(&oneWire);
 
@@ -85,13 +85,14 @@ void setup() {
   Serial.begin(9600);
   
   // Initialize OLED display
-  if(!display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
+  if(!display.begin(OLED_ADDRESS, true)) {
+    Serial.println(F("SH1106 allocation failed"));
     for(;;);
   }
   display.clearDisplay();
+  display.setContrast(255);  // Maximum brightness
   display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(20, 20);
   display.println(F("Hydroponic v3.0"));
   display.setCursor(20, 35);
@@ -113,6 +114,7 @@ void setup() {
   readSensors();
   
   display.clearDisplay();
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(25, 28);
   display.println(F("System Ready!"));
   display.display();
@@ -283,7 +285,7 @@ void handleMixing(unsigned long now) {
 void updateDisplay() {
   display.clearDisplay();
   display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   
   // Line 0: pH + warning (Y=0)
   display.setCursor(0, 0);
@@ -294,8 +296,8 @@ void updateDisplay() {
   else if (pH > PH_MAX) display.print(F("HIGH! ADD DN"));
   else                  display.print(F("OK"));
   
-  // Line 1: TDS (Y=12)
-  display.setCursor(0, 14);
+  // Line 1: TDS (Y=13)
+  display.setCursor(0, 13);
   display.print(F("TDS: "));
   display.print((int)tds);
   display.print(F(" ppm "));
@@ -303,8 +305,8 @@ void updateDisplay() {
   else if (tds > TDS_MAX) display.print(F("HIGH"));
   else                    display.print(F("OK"));
   
-  // Line 2: Temperature (Y=24)
-  display.setCursor(0, 28);
+  // Line 2: Temperature (Y=26)
+  display.setCursor(0, 26);
   display.print(F("Temp: "));
   display.print(temp, 1);
   display.print(F("C "));
@@ -313,13 +315,13 @@ void updateDisplay() {
   else if (temp > TEMP_MAX)    display.print(F("WARM"));
   else                         display.print(F("OK"));
   
-  // Line 3: Pump status (Y=36)
-  display.setCursor(0, 42);
+  // Line 3: Pump status (Y=39)
+  display.setCursor(0, 39);
   display.print(F("Pump: "));
   display.print(pumpOn ? F("ON") : F("OFF"));
   
-  // Line 4: System status (Y=48)
-  display.setCursor(0, 56);
+  // Line 4: System status (Y=52)
+  display.setCursor(0, 52);
   display.print(F("Status: "));
   display.print(status);
   
