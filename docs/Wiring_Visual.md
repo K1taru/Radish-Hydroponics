@@ -144,16 +144,16 @@
   │    ║  ┌──────────────────────────────────────────────────────────┐ │     │     │     │    │   │ ║  │
   │    ║  │                    DIGITAL PINS                          │ │     │     │     │    │   │ ║  │
   │    ║  │  D0  D1  D2  D3  D4  D5  D6  D7  D8  D9  D10 D11 D12 D13 │ │     │     │     │    │   │ ║  │
-  │    ║  │  ○   ○   ●   ○   ○   ○   ○   ●   ●   ●   ●   ○   ○   ○   │ │     │     │     │    │   │ ║  │
-  │    ║  └───────────┼─────────────────┼───┼───┼───┼────────────────┘ │     │     │     │    │   │ ║  │
-  │    ║              │                 │   │   │   │                  │     │     │     │    │   │ ║  │
-  │    ║              │                 │   │   │   └──────────────────┼─────┼─────┼─────┘    │   │ ║  │
-  │    ║              │                 │   │   └──────────────────────┼─────┼─────┘          │   │ ║  │
-  │    ║              │                 │   └──────────────────────────┼─────┘                ▼   ▼ ║  │
-  │    ║              │                 └──────────────────────────────┘                     5V  GND║  │
-  │    ║              │                                                                  (POWER PIN)║  │
-  │    ║  ┌───────────┼─────────────────────────────────────────────────────────────────────────────╫─┐│
-  │    ║  │           │                    POWER PINS                                               ║ ││
+  │    ║  │  ○   ○   ○   ○   ○   ○   ○   ●   ●   ●   ●   ○   ○   ○   │ │     │     │     │    │   │ ║  │
+  │    ║  └─────────────────────────────┼───┼───┼───┼────────────────┘ │     │     │     │    │   │ ║  │
+  │    ║                                │   │   │   │                  │     │     │     │    │   │ ║  │
+  │    ║                                │   │   │   └──────────────────┼─────┼─────┼─────┘    │   │ ║  │
+  │    ║                                │   │   └──────────────────────┼─────┼─────┘          │   │ ║  │
+  │    ║                                │   └──────────────────────────┼─────┘                ▼   ▼ ║  │
+  │    ║                                └──────────────────────────────┘                     5V  GND║  │
+  │    ║                                                                                 (POWER PIN)║  │
+  │    ║  ┌─────────────────────────────────────────────────────────────────────────────────────────╫─┐│
+  │    ║  │                                POWER PINS                                               ║ ││
   │    ║  │  RESET   3.3V   5V   GND   GND   Vin                                                    ║ ││
   │    ║  │    ○      ○     ●     ●     ○     ○                                                     ║ ││
   │    ║  └─────────────────────────────────────────────────────────────────────────────────────────╫─┘│
@@ -162,40 +162,37 @@
   │    ║  ┌─────────────────────────────────────────────────────────────────────────────────────────╫─┐│
   │    ║  │                                 ANALOG PINS                                             ║ ││
   │    ║  │   A0   A1   A2   A3   A4   A5                                                           ║ ││
-  │    ║  │    ●    ●    ○    ○    ●    ●                                                           ║ ││
-  │    ║  └────┼────┼─────────────┼────┼────────────────────────────────────────────────────────────╫─┘│
-  │    ║       │    │             │    │                                                            ║  │
-  │    ╚═══════╪════╪═════════════╪════╪════════════════════════════════════════════════════════════╝  │
-  │            │    │             │    │                                                               │
-  └────────────┼────┼─────────────┼────┼───────────────────────────────────────────────────────────────┘
-               │    │             │    │
-               │    │             │    │
-               │    │             │    │
-               │    │             │    │
-               │    │             │    │
-               ▼    │             ▼    ▼
-    ┌──────────┐    │        ┌─────────────┐
-    │pH SENSOR │    │        │ I2C LCD     │
-    │  MODULE  │    │        │  20x4       │
-    ├──────────┤    │        ├─────────────┤
-    │ VCC → 5V │    │        │ VCC → 5V    │
-    │ GND → GND│    │        │ GND → GND   │
-    │ OUT → A0 │    │        │ SDA → A4    │
-    └──────────┘    │        │ SCL → A5    │
-                    │        └─────────────┘
-                    ▼
-           ┌──────────┐      ┌─────────────────────────┐
-           │TDS SENSOR│      │   DS18B20 TEMP SENSOR   │
-           │  MODULE  │      │   (Waterproof Probe)    │
-           ├──────────┤      ├─────────────────────────┤
-           │ VCC → 5V │      │ RED    → 5V             │
-           │ GND → GND│      │ BLACK  → GND            │
-           │ OUT → A1 │      │ YELLOW → D2             │
-           └──────────┘      │                         │
-                             │    ┌───[4.7kΩ]───┐      │
-                             │    │             │      │
-                             │  YELLOW         5V      │
-                             │  (Pull-up Resistor)     │
+  │    ║  │    ●    ●    ●    ○    ●    ●                                                           ║ ││
+  │    ║  └────┼────┼────┼────────┼────┼────────────────────────────────────────────────────────────╫─┘│
+  │    ║       │    │    │        │    │                                                            ║  │
+  │    ╚═══════╪════╪════╪════════╪════╪════════════════════════════════════════════════════════════╝  │
+  │            │    │    │        │    │                                                               │
+  └────────────┼────┼────┼────────┼────┼───────────────────────────────────────────────────────────────┘
+               │    │    │        │    │
+               │    │    │        │    │
+               │    │    │        │    │
+               ▼    │    │        ▼    ▼
+    ┌──────────┐    │    │   ┌─────────────────────┐
+    │pH SENSOR │    │    │   │  I2C DISPLAY        │
+    │  MODULE  │    │    │   │  (LCD or OLED)      │
+    ├──────────┤    │    │   ├─────────────────────┤
+    │ VCC → 5V │    │    │   │ VCC → 5V            │
+    │ GND → GND│    │    │   │ GND → GND           │
+    │ OUT → A0 │    │    │   │ SDA → A4            │
+    └──────────┘    │    │   │ SCL → A5            │
+                    │    │   └─────────────────────┘
+                    ▼    │
+           ┌──────────┐  │   ┌─────────────────────────┐
+           │TDS SENSOR│  │   │   NTC THERMISTOR        │
+           │  MODULE  │  │   │   (10K, Waterproof)     │
+           ├──────────┤  │   ├─────────────────────────┤
+           │ VCC → 5V │  │   │                         │
+           │ GND → GND│  │   │    5V ───[10kΩ]───┬── A2│
+           │ OUT → A1 │  │   │                   │     │
+           └──────────┘  │   │                 [NTC]   │
+                         │   │                   │     │
+                         └───┼───────────────────┤     │
+                             │                  GND    │
                              └─────────────────────────┘
 ```
 
@@ -212,19 +209,24 @@
 ├─────────────┼───────────────────────┼───────────────────────────────────────┤
 │     A0      │  pH Sensor Signal     │  🟢 Green                             │
 │     A1      │  TDS Sensor Signal    │  🟡 Yellow                            │
-│     A4      │  LCD SDA (I2C Data)   │  🔵 Blue                              │
-│     A5      │  LCD SCL (I2C Clock)  │  🟣 Purple                            │
-│     D2      │  DS18B20 Data         │  🟡 Yellow                            │
+│     A2      │  NTC Thermistor       │  🟡 Yellow                            │
+│     A4      │  Display SDA (I2C)    │  🔵 Blue                              │
+│     A5      │  Display SCL (I2C)    │  🟣 Purple                            │
 │     D7      │  Relay IN1 (Water)    │  🟠 Orange                            │
 │     D8      │  Relay IN2 (Nut A)    │  🟠 Orange                            │
 │     D9      │  Relay IN3 (Nut B)    │  🟠 Orange                            │
 │     D10     │  Relay IN4 (Refill)   │  🟠 Orange                            │
 │     5V      │  All VCC connections  │  🔴 Red                               │
-│             │  (Sensors, LCD, Relay)│                                       │
+│             │  (Sensors,Display,Rly)│                                       │
 │     GND     │  All GND connections  │  ⚫ Black                             │
-│             │  (Sensors, LCD, Relay)│                                       │
+│             │  (Sensors,Display,Rly)│                                       │
 └─────────────┴───────────────────────┴───────────────────────────────────────┘
 ```
+
+**Both Displays Used Simultaneously (I2C Bus Sharing):**
+- **20x4 I2C LCD** (Address: 0x27) - Large text display
+- **1.3" OLED SH1106** (Address: 0x3C) - High contrast display
+- Both connect to same A4 (SDA) and A5 (SCL) pins
 
 ---
 
@@ -725,28 +727,41 @@ TOP VIEW OF 4-CHANNEL RELAY MODULE:
 
 ```
                             5V POWER BUS (RED)
-     ═══════════════════════════●═══════════════════════════════════════════
+     ═══════════════════════════●═══════════════════════════════════════════════════════
                                 │
-            ┌───────────────────┼───────────────────┬───────────────────┐
-            │                   │                   │                   │
-            ▼                   ▼                   ▼                   ▼
-      ┌─────────┐         ┌─────────┐         ┌─────────┐         ┌─────────┐
-      │ pH      │         │ TDS     │         │ DS18B20 │         │ LCD     │
-      │ SENSOR  │         │ SENSOR  │         │  TEMP   │         │ 20x4    │
-      │         │         │         │         │         │         │  I2C    │
-      │ [VCC]●──┤         │ [VCC]●──┤         │ [RED]●──┤         │ [VCC]●──┤
-      │ [GND]●──┤         │ [GND]●──┤         │ [BLK]●──┤         │ [GND]●──┤
-      │ [OUT]●──┼── A0    │ [OUT]●──┼── A1    │ [YEL]●──┼── D2    │ [SDA]●──┼── A4
-      └─────────┘         └─────────┘         │         │         │ [SCL]●──┼── A5
-            │                   │             │  4.7kΩ  │         └─────────┘
-            │                   │             │ ┌─[===]─┤               │
-            │                   │             │ │       │               │
-            │                   │             │ └───────┼── 5V          │
-            │                   │             └─────────┘               │
-            │                   │                   │                   │
-            ▼                   ▼                   ▼                   ▼
-     ═══════════════════════════●═══════════════════════════════════════════
+            ┌───────────────────┼───────────────────┬───────────────────┬───────────────┐
+            │                   │                   │                   │               │
+            ▼                   ▼                   ▼                   ▼               ▼
+      ┌─────────┐         ┌─────────┐         ┌─────────┐         ┌─────────┐    ┌─────────┐
+      │ pH      │         │ TDS     │         │  NTC    │         │  LCD    │    │  OLED   │
+      │ SENSOR  │         │ SENSOR  │         │THERMIST.│         │  20x4   │    │ SH1106  │
+      │         │         │         │         │         │         │  I2C    │    │  I2C    │
+      │ [VCC]●──┤         │ [VCC]●──┤         │  10kΩ   │         │ [VCC]●──┤    │ [VCC]●──┤
+      │ [GND]●──┤         │ [GND]●──┤         │ ┌─[===]─┤         │ [GND]●──┤    │ [GND]●──┤
+      │ [OUT]●──┼── A0    │ [OUT]●──┼── A1    │ │       │         │ [SDA]●──┼─┬──│ [SDA]●──┼── A4
+      └─────────┘         └─────────┘         │ └───────┼── A2    │ [SCL]●──┼─┼──│ [SCL]●──┼── A5
+            │                   │             │  [NTC]  │         └─────────┘ │  └─────────┘
+            │                   │             │    │    │         Addr:0x27   │  Addr:0x3C
+            │                   │             └────┼────┘               │     │        │
+            │                   │                  │                    │     │        │
+            ▼                   ▼                  ▼                    ▼     ▼        ▼
+     ═══════════════════════════●═════════════════════════════════════════════════════════
                             GND BUS (BLACK)
+```
+
+**Both Displays Share I2C Bus (Different Addresses):**
+- LCD uses address 0x27 (or 0x3F)
+- OLED uses address 0x3C
+- Both SDA lines connect together to A4
+- Both SCL lines connect together to A5
+
+**NTC Thermistor Voltage Divider:**
+```
+    5V ───[10kΩ Resistor]───┬─── A2 (to Arduino)
+                            │
+                          [NTC]
+                            │
+                           GND
 ```
 
 ---
@@ -881,9 +896,9 @@ TOP VIEW OF 4-CHANNEL RELAY MODULE:
 | 🔴 **Red** | +5V Power (Arduino/Sensors) | 5V DC |
 | ⚫ **Black** | Ground (All DC) | 0V |
 | 🟢 **Green** | pH Sensor Signal | 0-5V Analog |
-| 🟡 **Yellow** | TDS Sensor / Temp Sensor Signal | 0-5V |
-| 🔵 **Blue** | I2C SDA (LCD Data) / AC Neutral | Digital / 220V |
-| 🟣 **Purple** | I2C SCL (LCD Clock) | Digital |
+| 🟡 **Yellow** | TDS Sensor / NTC Thermistor Signal | 0-5V Analog |
+| 🔵 **Blue** | I2C SDA (Display Data) / AC Neutral | Digital / 220V |
+| 🟣 **Purple** | I2C SCL (Display Clock) | Digital |
 | 🟠 **Orange** | Relay Control Signals | 0-5V Digital |
 | 🔴 **Red (thick)** | +12V Power (Peristaltic Pumps) | 12V DC |
 | ⚫ **Black (thick)** | 12V Ground (Peristaltic Pumps) | 0V |
@@ -901,16 +916,21 @@ TOP VIEW OF 4-CHANNEL RELAY MODULE:
    ┌─────────────────────────────────────────┐
    │  DIGITAL SIDE           ANALOG SIDE     │
    │                                         │
-   │  D2  ──── Temp Sensor   A0 ──── pH      │
-   │  D7  ──── Relay IN1     A1 ──── TDS     │
-   │  D8  ──── Relay IN2     A4 ──── LCD SDA │
-   │  D9  ──── Relay IN3     A5 ──── LCD SCL │
-   │  D10 ──── Relay IN4                     │
+   │  D7  ──── Relay IN1     A0 ──── pH      │
+   │  D8  ──── Relay IN2     A1 ──── TDS     │
+   │  D9  ──── Relay IN3     A2 ──── NTC Temp│
+   │  D10 ──── Relay IN4     A4 ──── SDA     │
+   │                         A5 ──── SCL     │
    │                                         │
-   │  5V  ──── All VCC (sensors, relay, LCD) │
+   │  5V  ──── All VCC (sensors,relay,disp)  │
    │  GND ──── All Ground connections        │
    └─────────────────────────────────────────┘
 ```
+
+**Both Displays on Same I2C Bus:**
+- LCD Address: 0x27 (or 0x3F)
+- OLED Address: 0x3C
+- Both connect to A4/A5 simultaneously
 
 ---
 
@@ -928,8 +948,8 @@ TOP VIEW OF 4-CHANNEL RELAY MODULE:
 - [ ] All DC GND wires connected to common ground
 - [ ] **Relay VCC connected to Arduino 5V** ✅
 - [ ] **Relay GND connected to Arduino GND** ✅
-- [ ] 5V connections only to low-power components (sensors, LCD, relay logic)
-- [ ] 4.7kΩ pull-up resistor installed on DS18B20 data line
+- [ ] 5V connections only to low-power components (sensors, display, relay logic)
+- [ ] 10kΩ series resistor installed for NTC thermistor voltage divider
 
 ### Peristaltic Pumps (12V DC with U-Connection)
 - [ ] 12V adapter (+) connected to center COM (e.g., COM3)

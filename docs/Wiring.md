@@ -26,6 +26,7 @@ Complete wiring documentation for Radish Hydroponic System v1.0 and v2.0
 | Arduino Uno R3 | 1 | Main microcontroller |
 | 4-Channel Relay Module | 1 | Pump control (5V trigger, high-current switching) |
 | 20x4 I2C LCD Display | 1 | Real-time monitoring (Address: 0x27) |
+| 1.3" OLED SH1106 Display | 1 | Real-time monitoring (Address: 0x3C) |
 | Breadboard | 1 | Prototyping connections |
 | Jumper Wires (M-M, M-F) | Assorted | Connections |
 
@@ -34,7 +35,7 @@ Complete wiring documentation for Radish Hydroponic System v1.0 and v2.0
 |-----------|----------|------|------------|
 | pH Sensor Module | 1 | Analog | Pin A0 |
 | TDS Sensor V1.0 | 1 | Analog | Pin A1 |
-| DS18B20 Temperature Sensor | 1 | Digital (1-Wire) | Pin 2 |
+| 10K NTC Thermistor | 1 | Analog | Pin A2 |
 
 ### Actuators
 | Component | Quantity (v1) | Quantity (v2) | Purpose |
@@ -54,7 +55,7 @@ Complete wiring documentation for Radish Hydroponic System v1.0 and v2.0
 ### Additional Components
 | Component | Purpose |
 |-----------|---------|
-| 4.7kΩ Resistor | DS18B20 pull-up resistor |
+| 10kΩ Resistor | NTC thermistor voltage divider |
 | Terminal Blocks | Power distribution |
 | Wire Connectors | Secure connections |
 | Heat Shrink Tubing | Insulation |
@@ -136,21 +137,21 @@ Complete wiring documentation for Radish Hydroponic System v1.0 and v2.0
 |-----|------|----------|-----------|---------|
 | **A0** | Analog | pH Sensor Input | pH Sensor Signal | v1, v2 |
 | **A1** | Analog | TDS Sensor Input | TDS Sensor Signal | v1, v2 |
-| **A4** | I2C (SDA) | LCD Data | 20x4 LCD SDA | v1, v2 |
-| **A5** | I2C (SCL) | LCD Clock | 20x4 LCD SCL | v1, v2 |
-| **D2** | Digital | Temperature Sensor | DS18B20 Data | v1, v2 |
+| **A2** | Analog | Temperature Input | NTC Thermistor | v1, v2 |
+| **A4** | I2C (SDA) | Display Data | LCD/OLED SDA | v1, v2 |
+| **A5** | I2C (SCL) | Display Clock | LCD/OLED SCL | v1, v2 |
 | **D7** | Digital Output | Water Pump Control | Relay 1 (IN1) | v1, v2 |
 | **D8** | Digital Output | Nutrient A Control | Relay 2 (IN2) | v1, v2 |
 | **D9** | Digital Output | Nutrient B Control | Relay 3 (IN3) | v1, v2 |
 | **D10** | Digital Output | Refill Pump Control | Relay 4 (IN4) | **v2 only** |
-| **5V** | Power | +5V Output | Sensors, LCD, Relay VCC | v1, v2 |
+| **5V** | Power | +5V Output | Sensors, Display, Relay VCC | v1, v2 |
 | **GND** | Ground | Common Ground | All components | v1, v2 |
 | **Vin** | Power Input | 7-12V DC Input | External power (optional) | v1, v2 |
 
 ### Unused Pins (Available for Expansion)
 - D0, D1 (reserved for Serial - USB communication)
-- D3, D4, D5, D6, D11, D12, D13
-- A2, A3
+- D2, D3, D4, D5, D6, D11, D12, D13
+- A3
 
 ---
 
@@ -272,16 +273,17 @@ Arduino          Relay Module         Pumps (12V)
                  │
                  ├──► pH Sensor VCC
                  ├──► TDS Sensor VCC
-                 ├──► DS18B20 VCC
-                 ├──► LCD VCC
+                 ├──► NTC Thermistor (via 10kΩ resistor)
+                 ├──► Display VCC (LCD or OLED)
                  └──► Relay Module VCC
    ```
 
-### Phase 2: I2C LCD Display
+### Phase 2: I2C Displays (Both LCD AND OLED)
 
-**Components**: 20x4 LCD with I2C backpack (PCF8574 or similar)
+Both displays connect to the same I2C bus (A4/A5) but use different addresses.
 
-**Connections**:
+**20x4 LCD with I2C backpack** (PCF8574 or similar)
+
 | LCD Pin | Arduino Pin | Wire Color (suggested) |
 |---------|-------------|------------------------|
 | VCC | 5V | Red |
@@ -289,41 +291,72 @@ Arduino          Relay Module         Pumps (12V)
 | SDA | A4 | Blue |
 | SCL | A5 | Yellow |
 
-**Notes**:
+**Notes for LCD**:
 - Default I2C address: 0x27 (may be 0x3F on some modules)
 - Adjust contrast potentiometer on I2C backpack if display is blank
-- Test with I2C scanner sketch if not detected
 
-### Phase 3: DS18B20 Temperature Sensor
+**1.3" OLED SH1106 Display** (128x64 pixels)
 
-**Components**: DS18B20 sensor, 4.7kΩ resistor
+| OLED Pin | Arduino Pin | Wire Color (suggested) |
+|----------|-------------|------------------------|
+| VCC | 5V | Red |
+| GND | GND | Black |
+| SDA | A4 | Blue |
+| SCL | A5 | Yellow |
 
-**Standard 3-Wire Connection** (TO-92 package):
-| DS18B20 Pin | Connection | Wire Color |
-|-------------|------------|------------|
-| Pin 1 (GND) | Arduino GND | Black |
-| Pin 2 (Data) | Arduino D2 | Yellow |
-| Pin 3 (VCC) | Arduino 5V | Red |
+**Notes for OLED**:
+- Default I2C address: 0x3C (different from LCD!)
+- No backlight or contrast adjustment needed
 
-**Pull-up Resistor**:
+**Wiring Both Displays Together**:
 ```
-          4.7kΩ
-    5V ───/\/\/\───┬─── D2 (Data)
+Arduino A4 (SDA) ────┬──── LCD SDA
+                     └──── OLED SDA
+
+Arduino A5 (SCL) ────┬──── LCD SCL
+                     └──── OLED SCL
+
+Arduino 5V ──────────┬──── LCD VCC
+                     └──── OLED VCC
+
+Arduino GND ─────────┬──── LCD GND
+                     └──── OLED GND
+```
+
+**Important**: Both displays share the I2C bus but have different addresses (LCD: 0x27, OLED: 0x3C), so they work simultaneously without conflict.
+
+### Phase 3: NTC Thermistor Temperature Sensor
+
+**Components**: 10K NTC Thermistor, 10kΩ resistor
+
+**Voltage Divider Circuit**:
+```
+         10kΩ
+    5V ───/\/\/\───┬─── A2 (Analog Input)
                    │
-                DS18B20
+                [NTC 10K]
+                   │
+                  GND
 ```
 
-**Waterproof Version Wiring** (3 wires):
-| Wire Color | Connection |
-|------------|------------|
-| Red | 5V |
-| Black | GND |
-| Yellow/White | D2 + 4.7kΩ to 5V |
+| Connection | Arduino Pin | Wire Color |
+|------------|-------------|------------|
+| Resistor to 5V | 5V | Red |
+| Junction point | A2 | Yellow |
+| NTC to Ground | GND | Black |
+
+**Waterproof Version Wiring** (probe style):
+| Wire | Connection |
+|------|------------|
+| One wire | To A2 junction (with 10kΩ to 5V) |
+| Other wire | GND |
 
 **Notes**:
-- Pull-up resistor is **mandatory** for reliable operation
-- Can connect multiple DS18B20 sensors on same data line
-- Sensor returns -127°C if not properly connected
+- 10kΩ series resistor is **required** for voltage divider
+- NTC resistance decreases as temperature increases
+- Calibration constants in code: B=3950, R25=10kΩ
+- Accuracy: ±1°C typical (after calibration)
+- Waterproof probes available for submersion
 
 ### Phase 4: pH Sensor Module
 
@@ -569,6 +602,30 @@ Typical specifications:
   - Check pull-up resistor (4.7kΩ between Data and VCC)
   - Verify wiring connections
   - Test with Dallas Temperature test sketch
+
+### NTC Thermistor Temperature Sensor (Analog)
+
+**Calibration Parameters** (in code):
+```cpp
+#define THERMISTOR_NOMINAL    10000   // Resistance at 25°C
+#define TEMPERATURE_NOMINAL   25      // Reference temperature
+#define B_COEFFICIENT         3950    // Beta coefficient
+#define SERIES_RESISTOR       10000   // Voltage divider resistor
+```
+
+**Calibration Process**:
+1. Place thermistor in ice water (0°C) - record reading
+2. Place thermistor in room temperature water - record with thermometer
+3. Place thermistor in warm water (~40°C) - record with thermometer
+4. If readings are consistently off, adjust B_COEFFICIENT:
+   - Higher B = steeper curve (larger changes per °C)
+   - Lower B = flatter curve (smaller changes per °C)
+
+**Troubleshooting**:
+- Reading very high (>100°C): Check NTC is connected (not open circuit)
+- Reading very low (<-40°C): Check for short circuit across NTC
+- Inaccurate readings: Verify B_COEFFICIENT matches your thermistor datasheet
+- Unstable readings: Add 100nF capacitor between A2 and GND
 
 ---
 

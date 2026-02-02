@@ -1,7 +1,7 @@
-# Radish Hydroponic System v2.0 - Documentation
+# Radish Hydroponic System v5.0 - Documentation
 
 ## Overview
-Automated tower hydroponic system for radish cultivation with pH/TDS/temperature monitoring, sequential nutrient dosing to prevent chemical precipitation, and automatic water level detection with refill capability.
+Automated tower hydroponic system for radish cultivation with pH/TDS/temperature monitoring, sequential nutrient dosing to prevent chemical precipitation, and automatic water level detection with refill capability. Features dual display output (OLED + LCD simultaneously).
 
 ---
 
@@ -13,7 +13,7 @@ Automated tower hydroponic system for radish cultivation with pH/TDS/temperature
 ### Sensors
 - **pH Sensor** (Analog) → Pin A0
 - **TDS Sensor V1.0** (Analog) → Pin A1
-- **DS18B20 Temperature Sensor** (1-Wire Digital) → Pin 2
+- **10K NTC Thermistor** (Analog) → Pin A2
 
 ### Actuators
 - **Water Circulation Pump** (15W) → Pin 7
@@ -21,15 +21,16 @@ Automated tower hydroponic system for radish cultivation with pH/TDS/temperature
 - **Peristaltic Pump B** (Nutrient Solution B) → Pin 9
 - **Water Refill Pump** → Pin 10
 
-### Display
-- **20x4 I2C LCD** (Address: 0x27)
+### Displays (Both Used Simultaneously)
+- **20x4 I2C LCD** (Address: 0x27) - Large text, easy viewing
+- **1.3" OLED SH1106** (Address: 0x3C) - High contrast, compact
 
 ### Libraries Required
 ```cpp
 Wire.h                  // I2C communication
 LiquidCrystal_I2C.h    // LCD control
-OneWire.h              // 1-Wire protocol
-DallasTemperature.h    // DS18B20 interface
+Adafruit_GFX.h         // Graphics library
+Adafruit_SH110X.h      // SH1106 OLED driver
 ```
 
 ---
@@ -246,25 +247,49 @@ tds = (comp_voltage * 500.0 * TDS_K)
 - Conductivity increases ~2% per °C above 25°C
 - Compensation corrects to 25°C reference
 
-### Temperature Reading
+### Temperature Reading (NTC Thermistor)
 ```cpp
-tempSensor.requestTemperatures()
-temp = tempSensor.getTempCByIndex(0)
-if (temp < -50.0 || temp > 100.0) {
-  // Use last valid reading (sensor error)
-}
+// Read analog value and convert to resistance
+int analogValue = analogRead(A2);
+float resistance = SERIES_RESISTOR / ((1023.0 / analogValue) - 1.0);
+
+// Steinhart-Hart equation (simplified B-parameter)
+float steinhart;
+steinhart = resistance / THERMISTOR_NOMINAL;    // (R/Ro)
+steinhart = log(steinhart);                     // ln(R/Ro)
+steinhart /= B_COEFFICIENT;                     // 1/B * ln(R/Ro)
+steinhart += 1.0 / (TEMPERATURE_NOMINAL + 273.15);  // + (1/To)
+steinhart = 1.0 / steinhart;                    // Invert
+steinhart -= 273.15;                            // Convert to Celsius
+```
+
+**Calibration Constants:**
+```cpp
+#define THERMISTOR_NOMINAL    10000   // 10K NTC resistance at 25°C
+#define TEMPERATURE_NOMINAL   25      // Reference temperature
+#define B_COEFFICIENT         3950    // Beta coefficient (check datasheet)
+#define SERIES_RESISTOR       10000   // Voltage divider resistor (10K)
 ```
 
 ---
 
-## LCD Display Format
+## Display Format
 
-### Layout (20 characters × 4 lines)
+### LCD Layout (20 characters × 4 lines)
 ```
 Line 0: pH:X.XX [STATUS]
 Line 1: TDS:XXXXppm [STATUS]
 Line 2: Temp:XX.XC [STATUS]
 Line 3: Pump:[ON/OFF] [Status]
+```
+
+### OLED Layout (128x64 pixels, 5 lines)
+```
+Line 0 (Y=0):  pH: X.XX [STATUS]
+Line 1 (Y=13): TDS: XXXX ppm [STATUS]
+Line 2 (Y=26): Temp: XX.XC [STATUS]
+Line 3 (Y=39): Pump: ON/OFF
+Line 4 (Y=52): Status: [STATUS]
 ```
 
 ### Examples
@@ -397,10 +422,18 @@ Pump:OFF
 3. Calculate K factor: `TDS_K = actual_value / measured_value`
 4. Update `#define TDS_K` in code
 
-### Temperature Sensor
-- DS18B20 pre-calibrated from factory
-- No adjustment typically needed
-- Verify with thermometer if accuracy critical
+### NTC Thermistor Calibration
+1. Check your thermistor's B coefficient (usually on datasheet, common values: 3380, 3435, 3950)
+2. Update `#define B_COEFFICIENT` in code
+3. Test at known temperatures (ice water 0°C, room temp, body temp 37°C)
+4. If readings are consistently off:
+   - Higher B = steeper curve (larger temp changes per resistance change)
+   - Lower B = flatter curve
+
+**Troubleshooting NTC readings:**
+- Very high (>100°C): NTC not connected (open circuit)
+- Very low (<-40°C): Short circuit across NTC
+- Add 100nF capacitor from A2 to GND for stable readings
 
 ---
 
@@ -445,16 +478,33 @@ Pump:OFF
 - Test pump manually
 - Check for air locks in tubing
 
-### LCD Shows Garbage
+### Display Shows Garbage/Blank
+**For LCD:**
 - Verify I2C address (0x27 or 0x3F)
-- Check SDA/SCL connections
+- Check SDA/SCL connections (A4, A5)
+- Adjust contrast potentiometer
 - Test with I2C scanner sketch
 
-### Temperature Reading -127°C
-- DS18B20 not connected or damaged
-- Check 1-Wire connection (Pin 2)
-- Verify 4.7kΩ pull-up resistor
-- Replace sensor if defective
+**For OLED:**
+- Verify I2C address (0x3C or 0x3D)
+- Check SDA/SCL connections (A4, A5)
+- Ensure correct library (Adafruit_SH110X)
+- Test with I2C scanner sketch
+
+### Temperature Reading Very High (>100°C)
+- NTC thermistor not connected (open circuit)
+- Check wiring: 5V → 10kΩ → A2 → NTC → GND
+- Verify 10kΩ series resistor is installed
+
+### Temperature Reading Very Low (<-40°C)
+- Short circuit across NTC thermistor
+- Check for solder bridges or bare wire contact
+- Test NTC resistance with multimeter (~10kΩ at 25°C)
+
+### Temperature Reading Unstable/Noisy
+- Add 100nF capacitor between A2 and GND
+- Check for loose connections
+- Keep analog wires away from relay/pump wires
 
 ### Water Refill Not Triggering (v2.0)
 - Check TDS sensor reads ≤100 ppm when water low
@@ -479,7 +529,7 @@ Pump:OFF
 
 ### Power Requirements
 - Arduino: 5V @ 50mA
-- LCD: 5V @ 20mA
+- Display: 5V @ 20mA (LCD or OLED)
 - Sensors: 5V @ 15mA total
 - Pumps: 12V (separate supply recommended)
 
@@ -492,10 +542,18 @@ Pump:OFF
 
 ## Version History
 
-### v2.0 (Current)
-- **NEW:** Automatic water level detection via TDS sensor
-- **NEW:** Auto-refill pump control (30-second cycles)
-- **NEW:** Low water detection at TDS ≤ 100 ppm threshold
+### v5.0 (Current)
+- **NEW:** Dual display support - OLED SH1106 AND 20x4 I2C LCD (both simultaneously)
+- **NEW:** Analog NTC thermistor temperature sensor (replaces DS18B20)
+- Both displays update in real-time with same information
+- Temperature sensor moved from D2 to A2 (analog)
+- Simplified wiring (no pull-up resistor needed for temp)
+- All previous v2.0 features included
+
+### v2.0
+- Automatic water level detection via TDS sensor
+- Auto-refill pump control (30-second cycles)
+- Low water detection at TDS ≤ 100 ppm threshold
 - Sequential nutrient dosing with mixing prevention
 - pH monitoring only (manual adjustment)
 - Temperature-compensated TDS
@@ -515,6 +573,8 @@ Pump:OFF
 
 ### Completed
 - ✅ Water level detection with auto-refill (v2.0)
+- ✅ Dual display output - OLED AND LCD simultaneously (v5.0)
+- ✅ Analog NTC thermistor temperature sensor (v5.0)
 
 ### Potential Additions
 - pH automation with dosing pumps
@@ -552,6 +612,6 @@ For issues or questions:
 
 ---
 
-**Last Updated:** January 17, 2026  
-**Code Version:** 2.0  
+**Last Updated:** February 2, 2026  
+**Code Version:** 5.0  
 **Author:** K1taru
