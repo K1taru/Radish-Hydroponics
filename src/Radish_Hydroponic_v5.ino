@@ -79,11 +79,17 @@ unsigned long pumpOnTime = 0, pumpOffTime = 0;
 // Timing
 unsigned long lastRead = 0, lastLCD = 0, lastCheck = 0, lastDose = 0;
 
-// Mixing state machine
-enum MixState { MIX_NONE, DOSE_A, MIX_A, DOSE_B, MIX_B };
+// Mixing state machine (non-blocking)
+enum MixState { MIX_NONE, DOSE_A_ON, DOSE_A_WAIT, MIX_A, DOSE_B_ON, DOSE_B_WAIT, MIX_B };
 MixState mixState = MIX_NONE;
 unsigned long mixStart = 0;
+unsigned long doseStart = 0;  // For non-blocking dose timing
 bool mixOverride = false;
+
+// Sensor error flags
+bool phSensorError = false;
+bool tdsSensorError = false;
+bool tempSensorError = false;
 
 // Status (max 11 chars for LCD line 4)
 char status[12] = "Running";
@@ -191,18 +197,57 @@ float readDS18B20Temperature() {
 }
 
 void readSensors() {
-  // pH reading
-  float v = analogRead(PH_SENSOR_PIN) * (VREF / 1024.0);
-  pH = constrain(7.0 - ((v - 2.5) / 0.18) + PH_OFFSET, 0.0, 14.0);
+  // pH reading with averaging (10 samples) for stability
+  long phSum = 0;
+  for (int i = 0; i < 10; i++) {
+    phSum += analogRead(PH_SENSOR_PIN);
+    delay(10);  // Small delay between samples for ADC stability
+  }
+  float phRaw = phSum / 10.0;
+  float vPH = phRaw * (VREF / 1024.0);
+  
+  // pH sensor validation: check for disconnected/shorted sensor
+  // Valid range ~0.5V to ~4.5V (pH 0-14 range with some margin)
+  if (vPH < 0.2 || vPH > 4.8) {
+    phSensorError = true;
+    Serial.println(F("pH sensor error! Check connection."));
+    // Keep last valid pH reading
+  } else {
+    phSensorError = false;
+    // pH calculation: assumes 2.5V = pH 7, slope ~0.18V per pH unit
+    // Calibrate PH_OFFSET with buffer solutions for accuracy
+    pH = constrain(7.0 - ((vPH - 2.5) / 0.18) + PH_OFFSET, 0.0, 14.0);
+  }
   
   // Temperature reading (DS18B20 digital sensor)
   float t = readDS18B20Temperature();
-  if (t > -50.0 && t < 100.0) temp = t;
+  if (t == DEVICE_DISCONNECTED_C || t < -50.0 || t > 100.0) {
+    tempSensorError = true;
+  } else {
+    tempSensorError = false;
+    temp = t;
+  }
   
-  // TDS reading with temp compensation
-  v = analogRead(TDS_SENSOR_PIN) * (VREF / 1024.0);
-  float comp = 1.0 + 0.02 * (temp - 25.0);
-  tds = max(0.0, (v / comp) * 500.0 * TDS_K);
+  // TDS reading with averaging (10 samples)
+  long tdsSum = 0;
+  for (int i = 0; i < 10; i++) {
+    tdsSum += analogRead(TDS_SENSOR_PIN);
+    delay(10);
+  }
+  float tdsRaw = tdsSum / 10.0;
+  float vTDS = tdsRaw * (VREF / 1024.0);
+  
+  // TDS sensor validation: check for disconnected/shorted sensor
+  if (vTDS < 0.05 || vTDS > 4.9) {
+    tdsSensorError = true;
+    Serial.println(F("TDS sensor error! Check connection."));
+    // Keep last valid TDS reading
+  } else {
+    tdsSensorError = false;
+    // TDS with temperature compensation (2% per degree from 25°C)
+    float comp = 1.0 + 0.02 * (temp - 25.0);
+    tds = max(0.0, (vTDS / comp) * 500.0 * TDS_K);
+  }
 }
 
 void controlPump(unsigned long now) {
@@ -263,7 +308,7 @@ void checkNutrients(unsigned long now) {
   if (tds < (TDS_MIN + TDS_TOLERANCE)) {
     Serial.print(F("TDS low: "));
     Serial.println(tds);
-    mixState = DOSE_A;
+    mixState = DOSE_A_ON;  // Start with non-blocking dose
     mixOverride = true;
     mixStart = now;
   }
@@ -271,35 +316,51 @@ void checkNutrients(unsigned long now) {
 
 void handleMixing(unsigned long now) {
   unsigned long elapsed = now - mixStart;
+  unsigned long doseElapsed = now - doseStart;
   
   switch (mixState) {
-    case DOSE_A:
+    case DOSE_A_ON:
+      // Start dosing A (non-blocking)
       strcpy(status, "Dosing A");
       Serial.println(F("Dosing A"));
       digitalWrite(PUMP_NUTRIENT_A, HIGH);
-      delay(DOSE_TIME);
-      digitalWrite(PUMP_NUTRIENT_A, LOW);
-      mixState = MIX_A;
-      mixStart = now;
+      doseStart = now;
+      mixState = DOSE_A_WAIT;
+      break;
+      
+    case DOSE_A_WAIT:
+      // Wait for dose time to complete (non-blocking)
+      if (doseElapsed >= DOSE_TIME) {
+        digitalWrite(PUMP_NUTRIENT_A, LOW);
+        mixState = MIX_A;
+        mixStart = now;
+      }
       break;
       
     case MIX_A:
       strcpy(status, "Mixing A");
       if (elapsed >= MIX_A_TIME) {
-        mixState = DOSE_B;
+        mixState = DOSE_B_ON;
         mixStart = now;
       }
       break;
       
-    case DOSE_B:
+    case DOSE_B_ON:
+      // Start dosing B (non-blocking)
       strcpy(status, "Dosing B");
       Serial.println(F("Dosing B"));
-      delay(500);
       digitalWrite(PUMP_NUTRIENT_B, HIGH);
-      delay(DOSE_TIME);
-      digitalWrite(PUMP_NUTRIENT_B, LOW);
-      mixState = MIX_B;
-      mixStart = now;
+      doseStart = now;
+      mixState = DOSE_B_WAIT;
+      break;
+      
+    case DOSE_B_WAIT:
+      // Wait for dose time to complete (non-blocking)
+      if (doseElapsed >= DOSE_TIME) {
+        digitalWrite(PUMP_NUTRIENT_B, LOW);
+        mixState = MIX_B;
+        mixStart = now;
+      }
       break;
       
     case MIX_B:
@@ -336,30 +397,42 @@ void updateOLED() {
   // Line 0: pH + warning (Y=0)
   oled.setCursor(0, 0);
   oled.print(F("pH: "));
-  oled.print(pH, 2);
-  oled.print(F(" "));
-  if (pH < PH_MIN)      oled.print(F("LOW! ADD UP"));
-  else if (pH > PH_MAX) oled.print(F("HIGH! ADD DN"));
-  else                  oled.print(F("OK"));
+  if (phSensorError) {
+    oled.print(F("ERROR!"));
+  } else {
+    oled.print(pH, 2);
+    oled.print(F(" "));
+    if (pH < PH_MIN)      oled.print(F("LOW! ADD UP"));
+    else if (pH > PH_MAX) oled.print(F("HIGH! ADD DN"));
+    else                  oled.print(F("OK"));
+  }
   
   // Line 1: TDS (Y=13)
   oled.setCursor(0, 13);
   oled.print(F("TDS: "));
-  oled.print((int)tds);
-  oled.print(F(" ppm "));
-  if (tds < TDS_MIN)      oled.print(F("LOW"));
-  else if (tds > TDS_MAX) oled.print(F("HIGH"));
-  else                    oled.print(F("OK"));
+  if (tdsSensorError) {
+    oled.print(F("ERROR!"));
+  } else {
+    oled.print((int)tds);
+    oled.print(F(" ppm "));
+    if (tds < TDS_MIN)      oled.print(F("LOW"));
+    else if (tds > TDS_MAX) oled.print(F("HIGH"));
+    else                    oled.print(F("OK"));
+  }
   
   // Line 2: Temperature (Y=26)
   oled.setCursor(0, 26);
   oled.print(F("Temp: "));
-  oled.print(temp, 1);
-  oled.print(F("C "));
-  if (temp < TEMP_MIN)         oled.print(F("COLD"));
-  else if (temp > TEMP_WARNING) oled.print(F("HOT!"));
-  else if (temp > TEMP_MAX)    oled.print(F("WARM"));
-  else                         oled.print(F("OK"));
+  if (tempSensorError) {
+    oled.print(F("ERROR!"));
+  } else {
+    oled.print(temp, 1);
+    oled.print(F("C "));
+    if (temp < TEMP_MIN)         oled.print(F("COLD"));
+    else if (temp > TEMP_WARNING) oled.print(F("HOT!"));
+    else if (temp > TEMP_MAX)    oled.print(F("WARM"));
+    else                         oled.print(F("OK"));
+  }
   
   // Line 3: Pump status (Y=39)
   oled.setCursor(0, 39);
@@ -378,35 +451,47 @@ void updateLCD() {
   // Line 0: pH + warning
   lcd.setCursor(0, 0);
   lcd.print(F("pH:"));
-  lcd.print(pH, 2);
-  lcd.print(F(" "));
-  if (pH < PH_MIN)      lcd.print(F("LOW! ADD UP "));
-  else if (pH > PH_MAX) lcd.print(F("HIGH!ADD DWN"));
-  else                  lcd.print(F("OK          "));
+  if (phSensorError) {
+    lcd.print(F("ERR  CHECK SENSOR"));
+  } else {
+    lcd.print(pH, 2);
+    lcd.print(F(" "));
+    if (pH < PH_MIN)      lcd.print(F("LOW! ADD UP "));
+    else if (pH > PH_MAX) lcd.print(F("HIGH!ADD DWN"));
+    else                  lcd.print(F("OK          "));
+  }
   
   // Line 1: TDS
   lcd.setCursor(0, 1);
   lcd.print(F("TDS:"));
-  // Pad TDS value for consistent display
-  if (tds < 10)        lcd.print(F("   "));
-  else if (tds < 100)  lcd.print(F("  "));
-  else if (tds < 1000) lcd.print(F(" "));
-  lcd.print((int)tds);
-  lcd.print(F("ppm "));
-  if (tds < TDS_MIN)      lcd.print(F("LOW "));
-  else if (tds > TDS_MAX) lcd.print(F("HIGH"));
-  else                    lcd.print(F("OK  "));
+  if (tdsSensorError) {
+    lcd.print(F("ERR CHECK SENSOR"));
+  } else {
+    // Pad TDS value for consistent display
+    if (tds < 10)        lcd.print(F("   "));
+    else if (tds < 100)  lcd.print(F("  "));
+    else if (tds < 1000) lcd.print(F(" "));
+    lcd.print((int)tds);
+    lcd.print(F("ppm "));
+    if (tds < TDS_MIN)      lcd.print(F("LOW "));
+    else if (tds > TDS_MAX) lcd.print(F("HIGH"));
+    else                    lcd.print(F("OK  "));
+  }
   
   // Line 2: Temperature
   lcd.setCursor(0, 2);
   lcd.print(F("Temp:"));
-  if (temp < 10.0) lcd.print(F(" "));
-  lcd.print(temp, 1);
-  lcd.print(F("C "));
-  if (temp < TEMP_MIN)         lcd.print(F("COLD    "));
-  else if (temp > TEMP_WARNING) lcd.print(F("HOT!    "));
-  else if (temp > TEMP_MAX)    lcd.print(F("WARM    "));
-  else                         lcd.print(F("OK      "));
+  if (tempSensorError) {
+    lcd.print(F("ERR CHECK SENSOR"));
+  } else {
+    if (temp < 10.0) lcd.print(F(" "));
+    lcd.print(temp, 1);
+    lcd.print(F("C "));
+    if (temp < TEMP_MIN)         lcd.print(F("COLD    "));
+    else if (temp > TEMP_WARNING) lcd.print(F("HOT!    "));
+    else if (temp > TEMP_MAX)    lcd.print(F("WARM    "));
+    else                         lcd.print(F("OK      "));
+  }
   
   // Line 3: Pump status + System status
   lcd.setCursor(0, 3);
