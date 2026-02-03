@@ -35,9 +35,9 @@ LiquidCrystal_I2C lcd(LCD_ADDRESS, LCD_COLS, LCD_ROWS);
 OneWire oneWire(TEMP_SENSOR_PIN);
 DallasTemperature tempSensors(&oneWire);
 
-// pH Thresholds (Radish: 5.8-6.5)
-#define PH_MIN            5.8
-#define PH_MAX            6.5
+// pH Thresholds (Radish: 5.5-6.8)
+#define PH_MIN            5.5
+#define PH_MAX            6.8
 
 // TDS Thresholds (Radish: 600-900 ppm)
 #define TDS_MIN           600
@@ -50,19 +50,19 @@ DallasTemperature tempSensors(&oneWire);
 
 // Temperature Thresholds (18-24°C optimal)
 #define TEMP_MIN          18.0
-#define TEMP_MAX          24.0
-#define TEMP_WARNING      26.0
+#define TEMP_MAX          34.0
+#define TEMP_WARNING      40.0
 
 // Timing (ms)
-#define PUMP_ON_TIME      300000UL  // 5 min
-#define PUMP_OFF_TIME     900000UL  // 15 min
+#define PUMP_ON_TIME      180000UL  // 3 min
+#define PUMP_OFF_TIME     600000UL  // 10 min
 #define DOSE_TIME         5000UL    // 5 sec
 #define MIX_WAIT          180000UL  // 3 min
 #define MIX_A_TIME        180000UL  // 3 min
-#define MIX_B_TIME        300000UL  // 5 min
+#define MIX_B_TIME        180000UL  // 3 min
 #define SENSOR_INTERVAL   5000UL
 #define LCD_INTERVAL      2000UL
-#define CHECK_INTERVAL    60000UL
+#define CHECK_INTERVAL    5000UL    // Check nutrient level for adjustment
 
 // Calibration
 #define PH_OFFSET         0.0
