@@ -213,11 +213,15 @@ void runSimulation(unsigned long now) {
   
   unsigned long elapsed = now - simStateStart;
   
+  // Generate moving values for pH and temperature (always in normal range)
+  // Using sine waves with different periods for natural variation
+  float timeInSeconds = now / 1000.0;
+  simPH = 6.2 + 0.25 * sin(timeInSeconds / 30.0);     // pH varies 5.95-6.45
+  simTemp = 21.5 + 1.0 * sin(timeInSeconds / 45.0);   // Temp varies 20.5-22.5°C
+  
   switch (simState) {
     case SIM_NORMAL:
-      simPH = 6.2;
-      simTDS = 750.0;
-      simTemp = 22.0;
+      simTDS = 750.0 + 80.0 * sin(timeInSeconds / 60.0);  // TDS varies 670-830
       
       if (elapsed >= SIM_NORMAL_DURATION) {
         if (simCycleCount % 2 == 0) {
@@ -233,9 +237,7 @@ void runSimulation(unsigned long now) {
       break;
       
     case SIM_LOW_TDS:
-      simPH = 6.0;
       simTDS = 400.0;
-      simTemp = 22.0;
       
       if (mixState == MIX_NONE && elapsed >= SIM_LOW_TDS_DURATION) {
         simState = SIM_NORMAL;
@@ -245,9 +247,7 @@ void runSimulation(unsigned long now) {
       break;
       
     case SIM_LOW_WATER:
-      simPH = 6.2;
       simTDS = 50.0;
-      simTemp = 22.0;
       
       if (!refillActive && elapsed >= SIM_LOW_WATER_DURATION) {
         simState = SIM_NORMAL;
