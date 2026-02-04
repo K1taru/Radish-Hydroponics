@@ -535,21 +535,25 @@ void updateOLED() {
 }
 
 void updateLCD() {
-  // Line 0: pH + warning
+  // Line 0: pH + warning (20 chars: "pH:6.50M OK         ")
+  lcd.setCursor(0, 0);
+  lcd.print(F("                    "));  // Clear line
   lcd.setCursor(0, 0);
   lcd.print(F("pH:"));
   if (phSensorError) {
-    lcd.print(F("ERR  CHECK SENSOR"));
+    lcd.print(F("ERR CHECK SENSOR"));
   } else {
     lcd.print(pH, 2);
-    if (phManualMode) lcd.print(F("M"));  // M = Manual
+    if (phManualMode) lcd.print(F("M"));
     else              lcd.print(F(" "));
     if (pH < PH_MIN)      lcd.print(F("LOW! ADD UP "));
     else if (pH > PH_MAX) lcd.print(F("HIGH!ADD DWN"));
     else                  lcd.print(F("OK          "));
   }
   
-  // Line 1: TDS
+  // Line 1: TDS (20 chars: "TDS: 750ppm OK      ")
+  lcd.setCursor(0, 1);
+  lcd.print(F("                    "));  // Clear line
   lcd.setCursor(0, 1);
   lcd.print(F("TDS:"));
   if (tdsSensorError) {
@@ -560,14 +564,16 @@ void updateLCD() {
     else if (tds < 100)  lcd.print(F("  "));
     else if (tds < 1000) lcd.print(F(" "));
     lcd.print((int)tds);
-    if (tdsManualMode) lcd.print(F("Mppm"));  // M = Manual
+    if (tdsManualMode) lcd.print(F("Mppm"));
     else               lcd.print(F("ppm "));
-    if (tds < TDS_MIN)      lcd.print(F("LOW "));
-    else if (tds > TDS_MAX) lcd.print(F("HIGH"));
-    else                    lcd.print(F("OK  "));
+    if (tds < TDS_MIN)      lcd.print(F("LOW     "));
+    else if (tds > TDS_MAX) lcd.print(F("HIGH    "));
+    else                    lcd.print(F("OK      "));
   }
   
-  // Line 2: Temperature
+  // Line 2: Temperature (20 chars: "Temp:23.5C OK       ")
+  lcd.setCursor(0, 2);
+  lcd.print(F("                    "));  // Clear line
   lcd.setCursor(0, 2);
   lcd.print(F("Temp:"));
   if (tempSensorError) {
@@ -582,14 +588,17 @@ void updateLCD() {
     else                         lcd.print(F("OK      "));
   }
   
-  // Line 3: Pump status + System status
+  // Line 3: Pump status + System status (20 chars: "Pump:ON  Running    ")
+  lcd.setCursor(0, 3);
+  lcd.print(F("                    "));  // Clear line
   lcd.setCursor(0, 3);
   lcd.print(F("Pump:"));
   lcd.print(pumpOn ? F("ON ") : F("OFF"));
   lcd.print(F(" "));
   lcd.print(status);
-  // Pad remaining characters
-  for (int i = strlen(status); i < 8; i++) lcd.print(F(" "));
+  // Pad remaining characters to 20 total
+  int totalUsed = 9 + strlen(status);  // "Pump:ON " or "Pump:OFF" + status
+  for (int i = totalUsed; i < 20; i++) lcd.print(F(" "));
 }
 
 void printSerial() {

@@ -206,11 +206,25 @@ void readSensors() {
   float phRaw = phSum / 10.0;
   float vPH = phRaw * (VREF / 1024.0);
   
+  // Debug output for pH sensor (every 10 seconds)
+  static unsigned long lastpHDebug = 0;
+  if (millis() - lastpHDebug > 10000) {
+    Serial.print(F("pH DEBUG - Raw ADC: "));
+    Serial.print(phRaw, 1);
+    Serial.print(F(", Voltage: "));
+    Serial.print(vPH, 3);
+    Serial.print(F("V, Calculated pH: "));
+    Serial.println(7.0 - ((vPH - 2.5) / 0.18) + PH_OFFSET, 2);
+    lastpHDebug = millis();
+  }
+  
   // pH sensor validation: check for disconnected/shorted sensor
   // Valid range ~0.5V to ~4.5V (pH 0-14 range with some margin)
   if (vPH < 0.2 || vPH > 4.8) {
     phSensorError = true;
-    Serial.println(F("pH sensor error! Check connection."));
+    Serial.print(F("pH sensor error! Voltage: "));
+    Serial.print(vPH, 3);
+    Serial.println(F("V - Check connection."));
     // Keep last valid pH reading
   } else {
     phSensorError = false;
